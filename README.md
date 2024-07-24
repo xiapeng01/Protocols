@@ -1,3 +1,4 @@
+示例为TCP通信，暂时支持TCP和SerialPort,在.NetFramework4.8+hlsCommunication中测试通过
 ```C#
 		MC_3E mc = new MC_3E("127.0.0.1", 6000);
 		Console.WriteLine("基本方法测试：");
