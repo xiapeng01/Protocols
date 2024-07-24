@@ -1,6 +1,7 @@
 ﻿using Protocols.Protocols;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -15,7 +16,8 @@ namespace Protocols
             //方法测试
             try
             {
-                MC_3E mc = new MC_3E("127.0.0.1", 6000);
+                //MC_3E mc = new MC_3E("127.0.0.1", 6000);
+                MC_3E mc = new MC_3E("COM1",9600,8,Parity.None,StopBits.One);
                 Console.WriteLine("基本方法测试：");
 
                 Console.WriteLine("读写单个元件");

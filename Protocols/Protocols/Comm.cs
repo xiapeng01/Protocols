@@ -19,6 +19,7 @@ namespace Protocols.Protocols
     //为减少代码重写的抽象类
     internal abstract class AComm : IComm
     {
+        protected int waitReadDelay = 0;
         private int bufferSize = 1024;
         protected static SemaphoreSlim sem = new SemaphoreSlim(1, 1);
         private static int _minSemaphore = 1;
@@ -35,6 +36,7 @@ namespace Protocols.Protocols
             sem.Wait();
             var s = GetStream();
             s.Write(sendData, 0, sendData.Length);
+            Thread.Sleep(waitReadDelay);
             int n = s.Read(ret, 0, ret.Length);
             sem.Release();
             Array.Resize(ref ret, n);
@@ -89,6 +91,7 @@ namespace Protocols.Protocols
         {
             lock (lckObj)
             {
+                waitReadDelay = 0;
                 if (client == null) client = new TcpClient();
                 client.ReceiveTimeout = _timeOut;
                 if (!client.Connected) client.Connect(_ip, _port);
@@ -155,6 +158,7 @@ namespace Protocols.Protocols
         {
             lock (lckObj)
             {
+                waitReadDelay = 50;
                 //判断串口是否存在
                 var ports = SerialPort.GetPortNames();
                 if (!ports.Any(p => p.Contains(_portName))) throw new InvalidDataException($"串口:{_portName}不存在");
