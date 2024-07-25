@@ -9,8 +9,6 @@ namespace Protocols.Protocols
     //包含基本方法的基类-本类只能被继承，不能直接创建实例
     internal abstract class ProtocolBase
     {
-        protected static int iHeadFrameLength = 32;
-        protected static int iDataFrameLength = 64;
         protected IComm _comm;
         public ProtocolBase(IComm comm)
         {
