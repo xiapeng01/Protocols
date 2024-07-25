@@ -40,7 +40,6 @@ namespace Protocols.Protocols
             int n = s.Read(ret, 0, ret.Length);
             sem.Release();
             Array.Resize(ref ret, n);
-
             return ret;
         }
     }
@@ -111,7 +110,7 @@ namespace Protocols.Protocols
         private StopBits _stopBits;
         private int _timeOut = 1000;
 
-        private SerialPort sp = new SerialPort();
+        private SerialPort sp ;
         readonly object lckObj = new Object();
 
         //最简构造函数
@@ -170,11 +169,10 @@ namespace Protocols.Protocols
                     sp.DataBits = _dataBits;
                     sp.Parity = _parity;
                     sp.StopBits = _stopBits;
-                    sp.WriteTimeout = _timeOut;
-                    sp.ReadTimeout = _timeOut;
-
                 }
                 if (!sp.IsOpen) sp.Open();
+                sp.WriteTimeout = _timeOut;
+                sp.ReadTimeout = _timeOut;
                 return sp.BaseStream;
             }
         }
