@@ -1,7 +1,7 @@
 # Protocols-工业设备通信协议库
-一个为爱发电项目，正在逐步完善中  
-在VS2022+.Net Framework4.8 + hlsCommunication 本地测试通过（只测试了M,D寄存器）  
-目前只支持TCP方式和串口方式，欢迎反馈bug  
+一个为爱发电项目，正在逐步完善中   
+在VS2022+.Net Framework4.8 + hlsCommunication 本地测试通过（只测试了M,D寄存器）     
+目前只支持TCP方式和串口方式，欢迎反馈bug     
 ```
                 //MC_3E mc = new MC_3E("127.0.0.1", 6000);
                 MC_3E mc = new MC_3E("COM1",9600,8,Parity.None,StopBits.One);
