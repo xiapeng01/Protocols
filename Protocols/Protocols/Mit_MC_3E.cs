@@ -10,7 +10,10 @@ namespace Protocols.Protocols
     internal class MC_3Ebase : ProtocolBase
     {
         int receiveDataHeadLength = 11;
-        string pattern = @"[\s\t]";
+        string pattern = @"[\s\t]";       
+
+        string receiveHead = "D00000FFFF0300";
+
         //带IP，端口号设置的构造函数
         public MC_3Ebase(IComm comm) : base(comm)//显式调用基类的构造函数
         {
@@ -82,7 +85,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -90,7 +93,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 ret = new bool[Count];//初始化返回值数组
                 string strContent = "";//要将内容填充进去
@@ -131,7 +134,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -139,7 +142,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 return true;//校验成功，返回
             }
@@ -169,7 +172,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -177,7 +180,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 ret = new short[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -214,7 +217,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -222,7 +225,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 return true;//校验成功，返回
             }
@@ -251,7 +254,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -259,7 +262,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 ret = new UInt16[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -296,7 +299,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -304,7 +307,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 return true;//校验成功，返回
             }
@@ -334,7 +337,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString().Replace(" ", "").ToUpper();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString().Replace(" ", "").ToUpper();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -342,7 +345,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 ret = new Int32[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -379,7 +382,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -387,7 +390,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 return true;//校验成功，返回
             }
@@ -416,7 +419,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -424,7 +427,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 ret = new UInt32[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -461,7 +464,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -469,7 +472,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 return true;//校验成功，返回
             }
@@ -498,7 +501,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -506,7 +509,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 ret = new Single[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -543,7 +546,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -551,7 +554,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 return true;//校验成功，返回
             }
@@ -581,7 +584,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -589,7 +592,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 byte[] dat = new byte[Count];
                 Array.Copy(receiveData, receiveDataHeadLength, dat, 0, Count);
@@ -623,7 +626,7 @@ namespace Protocols.Protocols
             var strData = sbData.ToString();
             sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
             var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData).Replace(" ", "").ToUpper();//组合字符串格式发送数据,并剔除不必要的空白
+            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -631,7 +634,7 @@ namespace Protocols.Protocols
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").ToUpper().StartsWith("D0 00 00 FF FF 03 00".Replace(" ", "")))//接收内容符合格式要求
+                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
             {
                 return true;//校验成功，返回
             }
