@@ -1,4 +1,6 @@
-# Protocols-一个用爱发电项目，工业设备通信协议库，正在逐步完善中
+# Protocols-一个为爱发电项目
+工业设备通信协议库，正在逐步完善中
+目前只支持TCP方式和串口方式，欢迎反馈bug
 ```
                 //MC_3E mc = new MC_3E("127.0.0.1", 6000);
                 MC_3E mc = new MC_3E("COM1",9600,8,Parity.None,StopBits.One);
