@@ -78,6 +78,7 @@ namespace Protocols
 
                 //泛型方法测试
                 //读写单个元件
+                Console.WriteLine("读写单个元件");
                 Console.WriteLine("泛型布尔值测试");
                 mc.WriteData<bool>("M", 100, (object)true).Dump("泛型写布尔值");
                 mc.ReadData<bool>("M", 100).Dump("泛型读布尔值");
@@ -108,6 +109,7 @@ namespace Protocols
 
 
                 //读写多个元件
+                Console.WriteLine("读写多个元件");
                 Console.WriteLine("泛型布尔值测试");
                 mc.WriteData<bool[]>("M", 100, (object)new bool[] { true, false, true, false, true }).Dump("泛型写5布尔值");
                 mc.ReadData<bool[]>("M", 100, 5).Dump("泛型读5布尔值");
@@ -147,8 +149,11 @@ namespace Protocols
     {
         public static void Dump(this object obj,string msg)
         {
-            Console.WriteLine($"{msg}");
-            if(obj is Array)
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"-----------------{msg}-----------------");
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            if (obj is Array)
             {
                 foreach(var a in (Array)obj)
                 {
@@ -158,6 +163,10 @@ namespace Protocols
             {
                 Console.WriteLine("\t" + obj.ToString());
             }
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"-----------------{msg}-----------------");
+
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

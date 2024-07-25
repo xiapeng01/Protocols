@@ -9,10 +9,13 @@ namespace Protocols.Protocols
 {
     internal class MC_3Ebase : ProtocolBase
     {
-        int receiveDataHeadLength = 11;
-        string pattern = @"[\s\t]";       
+        const int iHeadFrameLength = 32;
+        const int iDataFrameLength = 64;
+        const int receiveDataHeadLength = 11;
+        const string pattern = @"[\s\t]";
 
-        string receiveHead = "D00000FFFF0300";
+        const string sendHead = "500000FFFF0300";
+        const string receiveHead = "D00000FFFF0300";
 
         //带IP，端口号设置的构造函数
         public MC_3Ebase(IComm comm) : base(comm)//显式调用基类的构造函数
@@ -62,18 +65,25 @@ namespace Protocols.Protocols
             }
         }
 
-        //bool读写
-        public override bool[] ReadBool(string regName, int Address, int Count)
+        //保留项目
+        string GetHeadString()
         {
-            bool[] ret = new bool[0];//初始化返回值
             StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
             sbHead.Append("5000");//副头部
             sbHead.Append("00");//网络号
             sbHead.Append("FF");//可编程控制器网络号
             sbHead.Append("FF03");//请求目标模块I/O编号
             sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+            return sbHead.ToString();
+        }
+
+        //bool读写
+        public override bool[] ReadBool(string regName, int Address, int Count)
+        {
+            bool[] ret = Array.Empty<bool>();//初始化返回值
+            
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
             sbData.Append("0000");//子指令 
@@ -82,10 +92,8 @@ namespace Protocols.Protocols
             sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
 
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString();  
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4)  + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -109,15 +117,9 @@ namespace Protocols.Protocols
         }
 
         public override bool WriteBool(string regName, int Address, bool[] values)
-        {
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+        { 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("0A00");//CPU监视定时器
             sbData.Append("0114");//指令批量写入
             sbData.Append("0100");//子指令 
@@ -129,12 +131,10 @@ namespace Protocols.Protocols
                 sbData.Append(value ? "1" : "0");
             }
             if (sbData.Replace(" ", "").Length % 2 != 0) sbData.Append("0");//不足偶数个字符补0		
-
+             
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -152,27 +152,19 @@ namespace Protocols.Protocols
         //16位读写
         public override Int16[] ReadInt16(string regName, int Address, int Count)
         {
-            Int16[] ret = new short[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+            Int16[] ret = Array.Empty<Int16>();//初始化返回值 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
             sbData.Append("0000");//子指令 
             sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
             sbData.Append(GetRegCode(regName));//软元件代码	 
             sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
-
+             
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -192,16 +184,9 @@ namespace Protocols.Protocols
         }
 
         public override bool WriteInt16(string regName, int Address, Int16[] values)
-        {
-            //Int16[] ret = new short[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+        { 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0114");//指令批量写入
             sbData.Append("0000");//子指令 
@@ -212,12 +197,10 @@ namespace Protocols.Protocols
             {
                 sbData.Append(ToBigEndianHexString(value).Substring(0, 4));
             }
-
+             
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -234,27 +217,19 @@ namespace Protocols.Protocols
 
         public override UInt16[] ReadUInt16(string regName, int Address, int Count)
         {
-            UInt16[] ret = new UInt16[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+            UInt16[] ret = Array.Empty<UInt16>();//初始化返回值 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
             sbData.Append("0000");//子指令 
             sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
             sbData.Append(GetRegCode(regName));//软元件代码	 
             sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
-
+             
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -274,16 +249,9 @@ namespace Protocols.Protocols
         }
 
         public override bool WriteUInt16(string regName, int Address, UInt16[] values)
-        {
-            //Int16[] ret = new short[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+        { 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0114");//指令批量写入
             sbData.Append("0000");//子指令 
@@ -294,12 +262,10 @@ namespace Protocols.Protocols
             {
                 sbData.Append(ToBigEndianHexString(value).Substring(0, 4));
             }
-
+             
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -317,27 +283,19 @@ namespace Protocols.Protocols
         //32位读写
         public override Int32[] ReadInt32(string regName, int Address, int Count)
         {
-            Int32[] ret = new Int32[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+            Int32[] ret = Array.Empty<Int32>();//初始化返回值 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
             sbData.Append("0000");//子指令 
             sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
             sbData.Append(GetRegCode(regName));//软元件代码	 
             sbData.Append(ToBigEndianHexString(Count * 2).Substring(0, 4));//软元件点数
-
+             
             //获取请求数据长度
-            var strData = sbData.ToString().Replace(" ", "").ToUpper();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString().Replace(" ", "").ToUpper();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -357,16 +315,9 @@ namespace Protocols.Protocols
         }
 
         public override bool WriteInt32(string regName, int Address, Int32[] values)
-        {
-            //Int16[] ret = new short[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+        { 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0114");//指令批量写入
             sbData.Append("0000");//子指令 
@@ -377,12 +328,10 @@ namespace Protocols.Protocols
             {
                 sbData.Append(ToBigEndianHexString(value).Substring(0, 8));
             }
-
+             
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -399,15 +348,9 @@ namespace Protocols.Protocols
 
         public override UInt32[] ReadUInt32(string regName, int Address, int Count)
         {
-            UInt32[] ret = new UInt32[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+            UInt32[] ret = Array.Empty<UInt32>();//初始化返回值 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
             sbData.Append("0000");//子指令 
@@ -416,10 +359,8 @@ namespace Protocols.Protocols
             sbData.Append(ToBigEndianHexString(Count * 2).Substring(0, 4));//软元件点数
 
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -439,16 +380,9 @@ namespace Protocols.Protocols
         }
 
         public override bool WriteUInt32(string regName, int Address, UInt32[] values)
-        {
-            //Int16[] ret = new short[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+        { 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0114");//指令批量写入
             sbData.Append("0000");//子指令 
@@ -461,10 +395,8 @@ namespace Protocols.Protocols
             }
 
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -481,15 +413,9 @@ namespace Protocols.Protocols
 
         public override Single[] ReadSingle(string regName, int Address, int Count)
         {
-            Single[] ret = new Single[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+            Single[] ret = Array.Empty<Single>();//初始化返回值 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
             sbData.Append("0000");//子指令 
@@ -498,10 +424,8 @@ namespace Protocols.Protocols
             sbData.Append(ToBigEndianHexString(Count * 2).Substring(0, 4));//软元件点数
 
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -521,16 +445,9 @@ namespace Protocols.Protocols
         }
 
         public override bool WriteSingle(string regName, int Address, Single[] values)
-        {
-            //Int16[] ret = new short[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+        { 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0114");//指令批量写入
             sbData.Append("0000");//子指令 
@@ -543,10 +460,8 @@ namespace Protocols.Protocols
             }
 
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -564,15 +479,9 @@ namespace Protocols.Protocols
         //读写字符串
         public override string ReadString(string regName, int Address, int Count)
         {
-            string ret = "";//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+            string ret = "";//初始化返回值 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
             sbData.Append("0000");//子指令 
@@ -581,10 +490,8 @@ namespace Protocols.Protocols
             sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
 
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
@@ -603,16 +510,9 @@ namespace Protocols.Protocols
         }
 
         public override bool WriteString(string regName, int Address, string values)
-        {
-            //Int16[] ret = new short[0];//初始化返回值
-            StringBuilder sbHead = new StringBuilder(iHeadFrameLength);//初始化帧头字符串
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串
-            sbHead.Append("5000");//副头部
-            sbHead.Append("00");//网络号
-            sbHead.Append("FF");//可编程控制器网络号
-            sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
-                                //s.Append("0C");//请求数据长度
+        { 
+            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0114");//指令批量写入
             sbData.Append("0000");//子指令 
@@ -623,10 +523,8 @@ namespace Protocols.Protocols
             sbData.Append(BitConverter.ToString(Encoding.ASCII.GetBytes(values)).Replace("-", ""));//转换为ASCII码再写进去
 
             //获取请求数据长度
-            var strData = sbData.ToString();
-            sbHead.Append(ToBigEndianHexString(strData.Length / 2).Substring(0, 4));//请求数据长度
-            var strHead = sbHead.ToString();
-            string sendStr = (strHead + strData);//组合字符串格式发送数据,并剔除不必要的空白
+            var strData = sbData.ToString(); 
+            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
