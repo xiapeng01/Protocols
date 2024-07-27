@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Protocols.Protocols
+namespace Protocols
 {
     //包含基本方法的基类-本类只能被继承，不能直接创建实例
     internal abstract class ProtocolBase
@@ -119,6 +119,18 @@ namespace Protocols.Protocols
                 }
             }
             return ret.ToString();
+        }
+
+        //字节数组比较
+        protected bool ByteRangeCompare(byte[] sources, byte[] pattern)
+        {
+            if (sources == null || pattern == null) return false;
+            if (sources.Length != pattern.Length) return false;
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                if (sources[i] != pattern[i]) return false;
+            }
+            return true;
         }
 
         //泛型版本
