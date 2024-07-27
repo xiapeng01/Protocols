@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Protocols.Array1
+namespace Protocols
 {
     internal class MC_3Ebase2 : ProtocolBase
     {
@@ -73,7 +73,6 @@ namespace Protocols.Array1
 
             List<byte> sbData = new List<byte>();//初始化帧数据字符串
             sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x04, 0x01, 0x00 });
-
             sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
             sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
             sbData.AddRange(BitConverter.GetBytes((Int16)Count));//软元件点数
@@ -105,10 +104,9 @@ namespace Protocols.Array1
         }
 
         public override bool WriteBool(string regName, int Address, bool[] values)
-        {
+        { 
             List<byte> sbData = new List<byte>();//初始化帧数据字符串
             sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x01, 0x00 });
-
             sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
             sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
             sbData.AddRange(BitConverter.GetBytes((Int16)values.Count()));//软元件点数
@@ -122,11 +120,12 @@ namespace Protocols.Array1
              
             sbData.AddRange(HexStringToByteArray(sb.ToString()));
 
-            var sendData=new List<byte>();
+            //拼接发送内容
+            var sendData =new List<byte>();
             sendData.AddRange(sendHead);
             sendData.AddRange(BitConverter.GetBytes(((Int16)sbData.Count())));
             sendData.AddRange(sbData.ToArray());
-             
+
             var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
@@ -143,21 +142,20 @@ namespace Protocols.Array1
         public override Int16[] ReadInt16(string regName, int Address, int Count)
         {
             Int16[] ret = Array.Empty<Int16>();//初始化返回值 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
 
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0104");//指令批量读取
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
-             
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x04, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)Count));//软元件点数
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            //获取请求数据长度  
+            var sendData = new List<byte>();//发送数据
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes((Int16)sbData.Count()));
+            sendData.AddRange(sbData);
+
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -174,26 +172,24 @@ namespace Protocols.Array1
         }
 
         public override bool WriteInt16(string regName, int Address, Int16[] values)
-        { 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
-
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0114");//指令批量写入
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(values.Count()).Substring(0, 4));//软元件点数
+        {
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)values.Count()));//软元件点数
             foreach (var value in values)
             {
-                sbData.Append(ToBigEndianHexString(value).Substring(0, 4));
+                sbData.AddRange(BitConverter.GetBytes(value));
             }
-             
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            //拼接发送内容
+            var sendData = new List<byte>();
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes(((Int16)sbData.Count())));
+            sendData.AddRange(sbData.ToArray());
+
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -208,28 +204,27 @@ namespace Protocols.Array1
         public override UInt16[] ReadUInt16(string regName, int Address, int Count)
         {
             UInt16[] ret = Array.Empty<UInt16>();//初始化返回值 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
 
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0104");//指令批量读取
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
-             
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x04, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)Count));//软元件点数
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            //获取请求数据长度  
+            var sendData = new List<byte>();//发送数据
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes((Int16)sbData.Count()));
+            sendData.AddRange(sbData);
+
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
                 ByteRangeCompare(receiveData.Take(receiveHead.Length).ToArray(), receiveHead))//接收内容符合格式要求
             {
-                ret = new UInt16[Count];//初始化返回值数组
+                ret = new ushort[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
                 {
                     ret[i] = BitConverter.ToUInt16(receiveData, receiveDataHeadLength + i * 2);
@@ -239,26 +234,25 @@ namespace Protocols.Array1
         }
 
         public override bool WriteUInt16(string regName, int Address, UInt16[] values)
-        { 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+        {
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)values.Count()));//软元件点数
 
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0114");//指令批量写入
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(values.Count()).Substring(0, 4));//软元件点数
             foreach (var value in values)
             {
-                sbData.Append(ToBigEndianHexString(value).Substring(0, 4));
+                sbData.AddRange(BitConverter.GetBytes(value));
             }
-             
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            //拼接发送内容
+            var sendData = new List<byte>();
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes(((Int16)sbData.Count())));
+            sendData.AddRange(sbData.ToArray());
+
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -270,25 +264,24 @@ namespace Protocols.Array1
             return false;//返回内容
         }
 
-        //32位读写
+        //32位读写 
         public override Int32[] ReadInt32(string regName, int Address, int Count)
         {
             Int32[] ret = Array.Empty<Int32>();//初始化返回值 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
 
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0104");//指令批量读取
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(Count * 2).Substring(0, 4));//软元件点数
-             
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x04, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)Count*2));//软元件点数
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            //获取请求数据长度  
+            var sendData = new List<byte>();//发送数据
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes((Int16)sbData.Count()));
+            sendData.AddRange(sbData);
+
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -298,33 +291,31 @@ namespace Protocols.Array1
                 ret = new Int32[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
                 {
-                    ret[i] = BitConverter.ToInt32(receiveData, receiveDataHeadLength + i * 4);
+                    ret[i] = BitConverter.ToInt32(receiveData, receiveDataHeadLength + i * 2);
                 }
             }
             return ret;//返回内容
         }
 
         public override bool WriteInt32(string regName, int Address, Int32[] values)
-        { 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
-
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0114");//指令批量写入
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(values.Count() * 2).Substring(0, 4));//软元件点数
+        {
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)values.Count()*2));//软元件点数
             foreach (var value in values)
             {
-                sbData.Append(ToBigEndianHexString(value).Substring(0, 8));
+                sbData.AddRange(BitConverter.GetBytes(value));
             }
-             
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            //拼接发送内容
+            var sendData = new List<byte>();
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes(((Int16)sbData.Count())));
+            sendData.AddRange(sbData.ToArray());
+
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -339,21 +330,20 @@ namespace Protocols.Array1
         public override UInt32[] ReadUInt32(string regName, int Address, int Count)
         {
             UInt32[] ret = Array.Empty<UInt32>();//初始化返回值 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
 
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0104");//指令批量读取
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(Count * 2).Substring(0, 4));//软元件点数
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x04, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)Count * 2));//软元件点数
 
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+            //获取请求数据长度  
+            var sendData = new List<byte>();//发送数据
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes((Int16)sbData.Count()));
+            sendData.AddRange(sbData);
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -363,33 +353,31 @@ namespace Protocols.Array1
                 ret = new UInt32[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
                 {
-                    ret[i] = BitConverter.ToUInt32(receiveData, receiveDataHeadLength + i * 4);
+                    ret[i] = BitConverter.ToUInt32(receiveData, receiveDataHeadLength + i * 2);
                 }
             }
             return ret;//返回内容
         }
 
         public override bool WriteUInt32(string regName, int Address, UInt32[] values)
-        { 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
-
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0114");//指令批量写入
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(values.Count() * 2).Substring(0, 4));//软元件点数
+        {
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)values.Count() * 2));//软元件点数
             foreach (var value in values)
             {
-                sbData.Append(ToBigEndianHexString(value).Substring(0, 8));
+                sbData.AddRange(BitConverter.GetBytes(value));
             }
 
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+            //拼接发送内容
+            var sendData = new List<byte>();
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes(((Int16)sbData.Count())));
+            sendData.AddRange(sbData.ToArray());
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -401,24 +389,24 @@ namespace Protocols.Array1
             return false;//返回内容
         }
 
+        //读写浮点数
         public override Single[] ReadSingle(string regName, int Address, int Count)
         {
             Single[] ret = Array.Empty<Single>();//初始化返回值 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
 
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0104");//指令批量读取
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(Count * 2).Substring(0, 4));//软元件点数
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x04, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)Count * 2));//软元件点数
 
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+            //获取请求数据长度  
+            var sendData = new List<byte>();//发送数据
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes((Int16)sbData.Count()));
+            sendData.AddRange(sbData);
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -428,33 +416,31 @@ namespace Protocols.Array1
                 ret = new Single[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
                 {
-                    ret[i] = BitConverter.ToSingle(receiveData, receiveDataHeadLength + i * 4);
+                    ret[i] = BitConverter.ToSingle(receiveData, receiveDataHeadLength + i * 2);
                 }
             }
             return ret;//返回内容
         }
 
         public override bool WriteSingle(string regName, int Address, Single[] values)
-        { 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
-
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0114");//指令批量写入
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(values.Count() * 2).Substring(0, 4));//软元件点数
+        {
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)values.Count() * 2));//软元件点数
             foreach (var value in values)
             {
-                sbData.Append(ToBigEndianHexString(value).Substring(0, 8));
+                sbData.AddRange(BitConverter.GetBytes(value));
             }
 
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+            //拼接发送内容
+            var sendData = new List<byte>();
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes(((Int16)sbData.Count())));
+            sendData.AddRange(sbData.ToArray());
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -470,21 +456,20 @@ namespace Protocols.Array1
         public override string ReadString(string regName, int Address, int Count)
         {
             string ret = "";//初始化返回值 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
 
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0104");//指令批量读取
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x04, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)Count));//软元件点数 
 
-            //获取请求数据长度
-            var strData = sbData.ToString(); 
-            string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+            //获取请求数据长度  
+            var sendData = new List<byte>();//发送数据
+            sendData.AddRange(sendHead);
+            sendData.AddRange(BitConverter.GetBytes((Int16)sbData.Count()));
+            sendData.AddRange(sbData);
 
-            var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.Send(sendData);//接收数据
+            var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -500,17 +485,14 @@ namespace Protocols.Array1
         }
 
         public override bool WriteString(string regName, int Address, string values)
-        { 
-            StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+        {
+            List<byte> sbData = new List<byte>();//初始化帧数据字符串
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x00, 0x00 });
+            sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
+            sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
+            sbData.AddRange(BitConverter.GetBytes((Int16)values.Count()));//软元件点数
 
-            sbData.Append("1000");//CPU监视定时器
-            sbData.Append("0114");//指令批量写入
-            sbData.Append("0000");//子指令 
-            sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
-            sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(values.Count()).Substring(0, 4));//软元件点数
-
-            sbData.Append(BitConverter.ToString(Encoding.ASCII.GetBytes(values)).Replace("-", ""));//转换为ASCII码再写进去
+            sbData.AddRange(Encoding.ASCII.GetBytes(values));//转换为ASCII码再写进去
 
             //获取请求数据长度
             var strData = sbData.ToString(); 
@@ -531,27 +513,27 @@ namespace Protocols.Array1
     }
 
     //为保持兼容而封装的密封类
-    internal sealed class MC_3E : MC_3Ebase
+    internal sealed class MC_3E2 : MC_3Ebase2
     {
         //以太网方式
         //最简构造函数
-        public MC_3E(string ip, int port) : base(new CommNet(ip, port)) {; }
+        public MC_3E2(string ip, int port) : base(new CommNet(ip, port)) {; }
 
         //不带信号量初始的构造函数
-        public MC_3E(string ip, int port, int timeOut) : base(new CommNet(ip, port, timeOut)) {; }
+        public MC_3E2(string ip, int port, int timeOut) : base(new CommNet(ip, port, timeOut)) {; }
 
         //全参构造函数
-        public MC_3E(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommNet(ip, port, timeOut, minSemaphore, maxSemaphore)) {; }
+        public MC_3E2(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommNet(ip, port, timeOut, minSemaphore, maxSemaphore)) {; }
 
         //串口方式
         //最简构造函数
-        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) {; }
+        public MC_3E2(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) {; }
 
         //不带信号量初始的构造函数
-        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) {; }
+        public MC_3E2(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) {; }
 
         //全参构造函数
-        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) {; }
+        public MC_3E2(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) {; }
 
     }
 }
