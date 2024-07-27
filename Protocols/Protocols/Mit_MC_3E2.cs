@@ -72,6 +72,7 @@ namespace Protocols.Array1
             bool[] ret = Array.Empty<bool>();//初始化返回值
 
             List<byte> sbData = new List<byte>();//初始化帧数据字符串
+
             sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x04, 0x01, 0x00 });
 
             sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
@@ -105,7 +106,7 @@ namespace Protocols.Array1
         }
 
         public override bool WriteBool(string regName, int Address, bool[] values)
-        {
+        { 
             List<byte> sbData = new List<byte>();//初始化帧数据字符串
             sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x01, 0x00 });
 
@@ -121,12 +122,12 @@ namespace Protocols.Array1
             if (sb.Replace(" ", "").Length % 2 != 0) sb.Append("0");//不足偶数个字符补0		
              
             sbData.AddRange(HexStringToByteArray(sb.ToString()));
-
+             
             var sendData=new List<byte>();
             sendData.AddRange(sendHead);
             sendData.AddRange(BitConverter.GetBytes(((Int16)sbData.Count())));
             sendData.AddRange(sbData.ToArray());
-             
+
             var receiveData = _comm.Send(sendData.ToArray());//接收数据
 
             //校验接收到的数据
