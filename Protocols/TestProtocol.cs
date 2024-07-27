@@ -1,11 +1,11 @@
-﻿using Protocols.Protocols;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using ConsoleDump;
 
 namespace Protocols
 {
@@ -145,28 +145,28 @@ namespace Protocols
         }
     }
 
-    public static class sdjlkfjsdlfkj
-    {
-        public static void Dump(this object obj,string msg)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"-----------------{msg}-----------------");
+    //public static class sdjlkfjsdlfkj
+    //{
+    //    public static void Dump(this object obj,string msg)
+    //    {
+    //        Console.ForegroundColor = ConsoleColor.Red;
+    //        Console.WriteLine($"-----------------{msg}-----------------");
 
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            if (obj is Array)
-            {
-                foreach(var a in (Array)obj)
-                {
-                    Console.WriteLine("\t"+a.ToString());
-                }
-            }else
-            {
-                Console.WriteLine("\t" + obj.ToString());
-            }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"-----------------{msg}-----------------");
+    //        Console.ForegroundColor = ConsoleColor.Yellow;
+    //        if (obj is Array)
+    //        {
+    //            foreach(var a in (Array)obj)
+    //            {
+    //                Console.WriteLine("\t"+a.ToString());
+    //            }
+    //        }else
+    //        {
+    //            Console.WriteLine("\t" + obj.ToString());
+    //        }
+    //        Console.ForegroundColor = ConsoleColor.Red;
+    //        Console.WriteLine($"-----------------{msg}-----------------");
 
-            Console.ForegroundColor = ConsoleColor.White;
-        }
-    }
+    //        Console.ForegroundColor = ConsoleColor.White;
+    //    }
+    //}
 }

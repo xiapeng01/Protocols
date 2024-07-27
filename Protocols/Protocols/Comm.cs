@@ -7,13 +7,16 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.Remoting.Messaging;
+using System.Data;
 
-namespace Protocols.Protocols
+namespace Protocols
 {
     //基本的接口
     internal interface IComm
     {
         byte[] Send(byte[] sendData);
+        Task<byte[]> SendAsync(byte[] sendData);
     }
 
     //为减少代码重写的抽象类
@@ -30,17 +33,50 @@ namespace Protocols.Protocols
         //发送和接收数据
         public byte[] Send(byte[] sendData)
         {
-            byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内 
-
-            //限制并发连接数
-            sem.Wait();
+            byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
+            sem.Wait();//限制并发连接数
             var s = GetStream();
             s.Write(sendData, 0, sendData.Length);
-            Thread.Sleep(waitReadDelay);
+            Thread.Sleep(waitReadDelay); 
             int n = s.Read(ret, 0, ret.Length);
             sem.Release();
             Array.Resize(ref ret, n);
             return ret;
+        }
+
+        public Task<Byte[]> SendAsync(byte[] sendData)
+        {      
+            return Task.Run<Byte[]>(() => {
+                sem.Wait();//限制并发连接数
+                var s = GetStream();
+                s.Write(sendData, 0, sendData.Length);
+                Thread.Sleep(waitReadDelay);
+                //Thread.Sleep(50);
+                int n = 0;
+                MemoryStream ms = new MemoryStream();
+                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内
+                int count = 0;
+                while (true)
+                {
+                    Array.Clear(ret, 0, ret.Length);
+                    n = s.Read(ret, 0, ret.Length);
+                    ms.Write(ret, 0, n);
+
+                    if (ret.Length > 5)
+                    {
+                        sem.Release();
+                        return Task.FromResult<Byte[]>(ret);
+                    }
+                    count++;
+                    if (count > 500)
+                    {
+                        sem.Release();
+                        throw new Exception("接收超时！");
+                        //return Task.FromResult<Byte[]>(Array.Empty<byte>());
+                    }
+                    Thread.Sleep(1);
+                }                
+            });            
         }
     }
 
