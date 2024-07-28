@@ -133,63 +133,6 @@ namespace Protocols
             return true;
         }
 
-        //泛型版本
-        public object ReadData<T>(string regName, int Address)
-        {
-            return ReadData<T>(regName, Address, 1);
-        }
-
-        public object ReadData<T>(string regName, int Address, int Count)
-        {
-            if (Count == 1)
-            {
-                if (typeof(T).Equals(typeof(bool))) return ReadBool(regName, Address, Count).FirstOrDefault();
-                if (typeof(T).Equals(typeof(Int16))) return ReadInt16(regName, Address, Count).FirstOrDefault();
-                if (typeof(T).Equals(typeof(UInt16))) return ReadUInt16(regName, Address, Count).FirstOrDefault();
-                if (typeof(T).Equals(typeof(Int32))) return ReadInt32(regName, Address, Count).FirstOrDefault();
-                if (typeof(T).Equals(typeof(UInt32))) return ReadUInt32(regName, Address, Count).FirstOrDefault();
-                if (typeof(T).Equals(typeof(Single))) return ReadSingle(regName, Address, Count).FirstOrDefault();
-            }
-            else
-            {
-                if (typeof(T).Equals(typeof(bool[]))) return ReadBool(regName, Address, Count);
-                if (typeof(T).Equals(typeof(Int16[]))) return ReadInt16(regName, Address, Count);
-                if (typeof(T).Equals(typeof(UInt16[]))) return ReadUInt16(regName, Address, Count);
-                if (typeof(T).Equals(typeof(Int32[]))) return ReadInt32(regName, Address, Count);
-                if (typeof(T).Equals(typeof(UInt32[]))) return ReadUInt32(regName, Address, Count);
-                if (typeof(T).Equals(typeof(Single[]))) return ReadSingle(regName, Address, Count);
-            }
-            if (typeof(T).Equals(typeof(string))) return ReadString(regName, Address, Count);
-            return null;
-        }
-
-        public bool WriteData<T>(string regName, int Address, object values)
-        {
-            if (values is Array)
-            {
-                if (typeof(T).Equals(typeof(bool[]))) return WriteBool(regName, Address, (bool[])Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(Int16[]))) return WriteInt16(regName, Address, (Int16[])Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(UInt16[]))) return WriteUInt16(regName, Address, (UInt16[])Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(Int32[]))) return WriteInt32(regName, Address, (Int32[])Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(UInt32[]))) return WriteUInt32(regName, Address, (UInt32[])Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(Single[]))) return WriteSingle(regName, Address, (Single[])Convert.ChangeType(values, typeof(T)));
-            }
-            else
-            {
-                if (typeof(T).Equals(typeof(bool))) return WriteBool(regName, Address, (bool)Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(Int16))) return WriteInt16(regName, Address, (Int16)Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(UInt16))) return WriteUInt16(regName, Address, (UInt16)Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(Int32))) return WriteInt32(regName, Address, (Int32)Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(UInt32))) return WriteUInt32(regName, Address, (UInt32)Convert.ChangeType(values, typeof(T)));
-                if (typeof(T).Equals(typeof(Single))) return WriteSingle(regName, Address, (Single)Convert.ChangeType(values, typeof(T)));
-            }
-            if (typeof(T).Equals(typeof(string))) return WriteString(regName, Address, (string)Convert.ChangeType(values, typeof(T)));
-
-            return false;
-        }
-
-
-
         //重载的布尔读写
         public bool ReadBool(string regName, int Address)
         {
@@ -274,5 +217,76 @@ namespace Protocols
         public virtual bool WriteSingle(string regName, int Address, Single[] values) { throw new Exception("此方法需由子类实现！"); }
         public virtual string ReadString(string regName, int Address, int Count) { throw new Exception("此方法需由子类实现！"); }
         public virtual bool WriteString(string regName, int Address, string values) { throw new Exception("此方法需由子类实现！"); }
+
+        //泛型版本
+        public T ReadData<T>(string regName, int Address)
+        {
+            return ReadData<T>(regName, Address, 1);
+        }
+
+        public T ReadData<T>(string regName, int Address, int Count)
+        {
+            if (Count == 1)
+            {
+                if (typeof(T).Equals(typeof(bool))) return (T)Convert.ChangeType(ReadBool(regName, Address, Count).FirstOrDefault(),typeof(T));
+                if (typeof(T).Equals(typeof(Int16))) return (T)Convert.ChangeType(ReadInt16(regName, Address, Count).FirstOrDefault(), typeof(T));
+                if (typeof(T).Equals(typeof(UInt16))) return (T)Convert.ChangeType(ReadUInt16(regName, Address, Count).FirstOrDefault(), typeof(T));
+                if (typeof(T).Equals(typeof(Int32))) return (T)Convert.ChangeType(ReadInt32(regName, Address, Count).FirstOrDefault(), typeof(T));
+                if (typeof(T).Equals(typeof(UInt32))) return (T)Convert.ChangeType(ReadUInt32(regName, Address, Count).FirstOrDefault(), typeof(T));
+                if (typeof(T).Equals(typeof(Single))) return (T)Convert.ChangeType(ReadSingle(regName, Address, Count).FirstOrDefault(), typeof(T));
+            }
+            else
+            {
+                if (typeof(T).Equals(typeof(bool[]))) return (T)Convert.ChangeType(ReadBool(regName, Address, Count), typeof(T));
+                if (typeof(T).Equals(typeof(Int16[]))) return (T)Convert.ChangeType(ReadInt16(regName, Address, Count), typeof(T));
+                if (typeof(T).Equals(typeof(UInt16[]))) return (T)Convert.ChangeType(ReadUInt16(regName, Address, Count), typeof(T));
+                if (typeof(T).Equals(typeof(Int32[]))) return (T)Convert.ChangeType(ReadInt32(regName, Address, Count), typeof(T));
+                if (typeof(T).Equals(typeof(UInt32[]))) return (T)Convert.ChangeType(ReadUInt32(regName, Address, Count), typeof(T));
+                if (typeof(T).Equals(typeof(Single[]))) return (T)Convert.ChangeType(ReadSingle(regName, Address, Count), typeof(T));
+            }
+            if (typeof(T).Equals(typeof(string))) return (T)Convert.ChangeType(ReadString(regName, Address, Count), typeof(T));
+            return default(T);
+        }
+
+        public bool WriteData<T>(string regName, int Address, object values)
+        {
+            if (values is Array)
+            {
+                if (typeof(T).Equals(typeof(bool[]))) return WriteBool(regName, Address, (bool[])Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(Int16[]))) return WriteInt16(regName, Address, (Int16[])Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(UInt16[]))) return WriteUInt16(regName, Address, (UInt16[])Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(Int32[]))) return WriteInt32(regName, Address, (Int32[])Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(UInt32[]))) return WriteUInt32(regName, Address, (UInt32[])Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(Single[]))) return WriteSingle(regName, Address, (Single[])Convert.ChangeType(values, typeof(T)));
+            }
+            else
+            {
+                if (typeof(T).Equals(typeof(bool))) return WriteBool(regName, Address, (bool)Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(Int16))) return WriteInt16(regName, Address, (Int16)Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(UInt16))) return WriteUInt16(regName, Address, (UInt16)Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(Int32))) return WriteInt32(regName, Address, (Int32)Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(UInt32))) return WriteUInt32(regName, Address, (UInt32)Convert.ChangeType(values, typeof(T)));
+                if (typeof(T).Equals(typeof(Single))) return WriteSingle(regName, Address, (Single)Convert.ChangeType(values, typeof(T)));
+            }
+            if (typeof(T).Equals(typeof(string))) return WriteString(regName, Address, (string)Convert.ChangeType(values, typeof(T)));
+
+            return false;
+        }
+
+        //异步版本
+        public Task<T> ReadDataAsync<T>(string regName, int Address, int Count)
+        {
+            return Task.FromResult<T>(ReadData<T>(regName,Address,Count));
+        }
+
+        public Task<T> ReadDataAsync<T>(string regName, int Address) 
+        {
+            return Task.FromResult(ReadData<T>(regName, Address));
+        }
+
+        public Task<bool> WriteDataAsync<T>(string regName, int Address, object values)
+        {
+            return Task.FromResult<bool>(WriteData<T>(regName,Address,values));
+        }
     }
 }

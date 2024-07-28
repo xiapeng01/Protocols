@@ -139,10 +139,10 @@ namespace Protocols
             sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
             sbData.Append(GetRegCode(regName));//软元件代码	 
             sbData.Append(ToBigEndianHexString((Int16)values.Count()).Substring(0, 4));//软元件点数
+
             int i = 0;
             int j = 0;
             byte dat = 0;
-
             foreach (var value in values)
             {
                 dat *= 2;
@@ -161,6 +161,7 @@ namespace Protocols
                     j = 0;
                 }                
             }
+
             if (sbData.Replace(" ", "").Length % 2 != 0) sbData.Append("0");//不足偶数个字符补0		
              
             //获取请求数据长度

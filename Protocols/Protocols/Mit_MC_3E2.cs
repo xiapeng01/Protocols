@@ -106,19 +106,32 @@ namespace Protocols
         public override bool WriteBool(string regName, int Address, bool[] values)
         { 
             List<byte> sbData = new List<byte>();//初始化帧数据字符串
-            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x01, 0x00 });
+            sbData.AddRange(new byte[] { 0x10, 0x00, 0x01, 0x14, 0x00, 0x00 });
             sbData.AddRange(BitConverter.GetBytes(Address).Take(3));//起始软元件十六进制大端格式
             sbData.AddRange(new byte[] { GetRegCode(regName) });//软元件代码	 
             sbData.AddRange(BitConverter.GetBytes((Int16)values.Count()));//软元件点数
 
-            var sb=new StringBuilder();
+            int i = 0;
+            int j = 0;
+            byte dat = 0;
             foreach (var value in values)
             {
-                sb.Append(value ? "1" : "0");
-            }
-            if (sb.Replace(" ", "").Length % 2 != 0) sb.Append("0");//不足偶数个字符补0		
-             
-            sbData.AddRange(HexStringToByteArray(sb.ToString()));
+                dat *= 2;
+                dat += value ? (byte)1 : (byte)0;
+                i++;
+                j++;
+                if (i == values.Length)
+                {
+                    sbData.Add(dat);
+                    break;
+                }
+                if (j == 8)
+                {
+                    sbData.Add(dat);
+                    dat = 0;
+                    j = 0;
+                }
+            } 
 
             //拼接发送内容
             var sendData =new List<byte>();
