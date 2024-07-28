@@ -77,6 +77,18 @@ namespace Protocols
             return sbHead.ToString();
         }
 
+        //读Bool型变量时，子指令为0000时的报文格式（读5个数据，返回内容为0x15：true,false,true,false,true）-此时数量取（(Count % 0x10)>0?Count/0x10+1:Count/0x10）
+        //发送: 50 00 00 FF FF 03 00 0C 00 10 00 01 04 00 00 64 00 00 90 01 00
+        //返回: D0 00 00 FF FF 03 00 0C 00 00 00 15 00 
+
+        //读Bool型变量时，子指令为0100时的报文格式（读5个数据，返回内容为布尔值形式：true,false,true,false,true）-此时数量取5
+        //发送 : 50 00 00 FF FF 03 00 0C 00 10 00 01 04 01 00 64 00 00 90 05 00
+        //返回 : D0 00 00 FF FF 03 00 05 00 00 00 10 10 10
+
+        //写Bool型变量时亦是如此，长度不足偶数时在末尾追加0，设备会根据读写长度将末尾的0删除
+
+        //以下方法使用不同子指令实现
+
         //bool读写
         public override bool[] ReadBool(string regName, int Address, int Count)
         {
@@ -86,10 +98,10 @@ namespace Protocols
 
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
-            sbData.Append("0100");//子指令 
+            sbData.Append("0000");//子指令 
             sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
             sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
+            sbData.Append(ToBigEndianHexString((Count % 0x10) > 0 ? Count / 0x10 + 1 : Count / 0x10).Substring(0, 4));//软元件点数
 
             //获取请求数据长度
             var strData = sbData.ToString();  
@@ -116,19 +128,34 @@ namespace Protocols
             return ret;//返回内容
         }
 
+        //使用子指令00
         public override bool WriteBool(string regName, int Address, bool[] values)
         { 
             StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
 
-            sbData.Append("0A00");//CPU监视定时器
+            sbData.Append("1000");//CPU监视定时器
             sbData.Append("0114");//指令批量写入
-            sbData.Append("0100");//子指令 
+            sbData.Append("0000");//子指令 
             sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
             sbData.Append(GetRegCode(regName));//软元件代码	 
             sbData.Append(ToBigEndianHexString((Int16)values.Count()).Substring(0, 4));//软元件点数
+            int i = 0;
+            int j = 0;
+            byte dat = 0;
+
             foreach (var value in values)
             {
-                sbData.Append(value ? "1" : "0");
+                dat *= 2;
+                dat += value?(byte)1:(byte)0;
+                i++;
+                j++;
+                if (i == values.Length) break;
+                if (j == 8)
+                {
+                    sbData.Append(dat.ToString("X2"));
+                    dat = 0;
+                    j = 0;
+                }                
             }
             if (sbData.Replace(" ", "").Length % 2 != 0) sbData.Append("0");//不足偶数个字符补0		
              
@@ -148,6 +175,40 @@ namespace Protocols
             }
             return false;//返回内容
         }
+
+        ////使用子指令01
+        //public bool WriteBool(string regName, int Address, bool[] values)
+        //{
+        //    StringBuilder sbData = new StringBuilder(iDataFrameLength);//初始化帧数据字符串 
+
+        //    sbData.Append("1000");//CPU监视定时器
+        //    sbData.Append("0114");//指令批量写入
+        //    sbData.Append("0100");//子指令 
+        //    sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
+        //    sbData.Append(GetRegCode(regName));//软元件代码	 
+        //    sbData.Append(ToBigEndianHexString((Int16)values.Count()).Substring(0, 4));//软元件点数
+        //    foreach (var value in values)
+        //    {
+        //        sbData.Append(value ? "1" : "0");
+        //    }
+        //    if (sbData.Replace(" ", "").Length % 2 != 0) sbData.Append("0");//不足偶数个字符补0		
+
+        //    //获取请求数据长度
+        //    var strData = sbData.ToString();
+        //    string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
+
+        //    var sendData = HexStringToByteArray(sendStr);//发送数据
+        //    var receiveData = _comm.SendAsync(sendData).Result;//接收数据
+
+        //    //校验接收到的数据
+        //    if (receiveData != null && //接收内容不为空
+        //        receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
+        //        BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+        //    {
+        //        return true;//校验成功，返回
+        //    }
+        //    return false;//返回内容
+        //}
 
         //16位读写
         public override Int16[] ReadInt16(string regName, int Address, int Count)
