@@ -134,6 +134,8 @@ namespace Protocols
                 mc.WriteData<Single[]>("D", 100, (object)new Single[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f }).Dump("泛型写5INT32");
                 mc.ReadData<Single[]>("D", 100, 5).Dump("泛型读5INT16");
 
+                Console.WriteLine("Done.");
+
                 Console.Read();
 
             }
@@ -144,29 +146,4 @@ namespace Protocols
             }
         }
     }
-
-    //public static class sdjlkfjsdlfkj
-    //{
-    //    public static void Dump(this object obj,string msg)
-    //    {
-    //        Console.ForegroundColor = ConsoleColor.Red;
-    //        Console.WriteLine($"-----------------{msg}-----------------");
-
-    //        Console.ForegroundColor = ConsoleColor.Yellow;
-    //        if (obj is Array)
-    //        {
-    //            foreach(var a in (Array)obj)
-    //            {
-    //                Console.WriteLine("\t"+a.ToString());
-    //            }
-    //        }else
-    //        {
-    //            Console.WriteLine("\t" + obj.ToString());
-    //        }
-    //        Console.ForegroundColor = ConsoleColor.Red;
-    //        Console.WriteLine($"-----------------{msg}-----------------");
-
-    //        Console.ForegroundColor = ConsoleColor.White;
-    //    }
-    //}
 }

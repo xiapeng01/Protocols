@@ -77,6 +77,18 @@ namespace Protocols
             return sbHead.ToString();
         }
 
+        //读Bool型变量时，子指令为0000时的报文格式（读5个数据，返回内容为0x15：true,false,true,false,true）-此时数量取（(Count % 0x10)>0?Count/0x10+1:Count/0x10）
+        //发送: 50 00 00 FF FF 03 00 0C 00 10 00 01 04 00 00 64 00 00 90 01 00
+        //返回: D0 00 00 FF FF 03 00 0C 00 00 00 15 00 
+
+        //读Bool型变量时，子指令为0100时的报文格式（读5个数据，返回内容为布尔值形式：true,false,true,false,true）-此时数量取5
+        //发送 : 50 00 00 FF FF 03 00 0C 00 10 00 01 04 01 00 64 00 00 90 05 00
+        //返回 : D0 00 00 FF FF 03 00 05 00 00 00 10 10 10
+
+        //写Bool型变量时亦是如此，长度不足偶数时在末尾追加0，设备会根据读写长度将末尾的0删除
+
+        //以下方法使用不同子指令实现
+
         //bool读写
         public override bool[] ReadBool(string regName, int Address, int Count)
         {
@@ -86,10 +98,10 @@ namespace Protocols
 
             sbData.Append("1000");//CPU监视定时器
             sbData.Append("0104");//指令批量读取
-            sbData.Append("0100");//子指令 
+            sbData.Append("0000");//子指令 
             sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
             sbData.Append(GetRegCode(regName));//软元件代码	 
-            sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
+            sbData.Append(ToBigEndianHexString((Count % 0x10) > 0 ? Count / 0x10 + 1 : Count / 0x10).Substring(0, 4));//软元件点数
 
             //获取请求数据长度
             var strData = sbData.ToString();  
