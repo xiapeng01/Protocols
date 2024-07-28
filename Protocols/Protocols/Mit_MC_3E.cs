@@ -149,7 +149,11 @@ namespace Protocols
                 dat += value?(byte)1:(byte)0;
                 i++;
                 j++;
-                if (i == values.Length) break;
+                if (i == values.Length)
+                {
+                    sbData.Append(dat.ToString("X2"));
+                    break;
+                }
                 if (j == 8)
                 {
                     sbData.Append(dat.ToString("X2"));

@@ -17,7 +17,7 @@ namespace Protocols
             try
             {
                 //MC_3E mc = new MC_3E("127.0.0.1", 6000);
-                MC_3E2 mc = new MC_3E2("COM1",9600,8,Parity.None,StopBits.One);
+                MC_3E mc = new MC_3E("COM1",9600,8,Parity.None,StopBits.One);
                 Console.WriteLine("基本方法测试：");
 
                 Console.WriteLine("读写单个元件");
