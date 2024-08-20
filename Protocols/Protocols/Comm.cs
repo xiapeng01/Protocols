@@ -15,6 +15,7 @@ namespace Protocols
     //基本的接口
     internal interface IComm
     {
+        string Send(string str);
         byte[] Send(byte[] sendData);
         Task<byte[]> SendAsync(byte[] sendData);
     }
@@ -29,7 +30,15 @@ namespace Protocols
         private static int _maxSemaphore = 1;
         protected abstract Stream GetStream();
 
-
+        /// <summary>
+        /// 经过包装的字符串格式发送接收方法
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public string Send(string str)
+        {
+            return Encoding.UTF8.GetString(Send(Encoding.UTF8.GetBytes(str)));
+        }
         //发送和接收数据
         public byte[] Send(byte[] sendData)
         {
