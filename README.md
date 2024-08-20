@@ -2,8 +2,9 @@
 一个为爱发电项目，正在逐步完善中   
 在VS2022+.Net Framework4.8 + HslCommunication 本地测试通过（只测试了M,D寄存器）     
 目前只支持TCP方式和串口方式，欢迎反馈bug   
-感谢拓拓，SlimeNull，Steve，林德熙，雾雨氏Bot，仙女之萌提供的帮助！   
-20240819:增加ModbusRTU。
+感谢拓拓，SlimeNull，Steve，林德熙，雾雨氏Bot，仙女之萌，Shompinice提供的帮助！   
+20240819：增加ModbusRTU。    
+20240820：增加了ModbusASCII
 ```
                 //字符串拼接方式
                 MC_3E mc = new MC_3E("127.0.0.1", 6000);

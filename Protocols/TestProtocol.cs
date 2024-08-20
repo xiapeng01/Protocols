@@ -14,12 +14,63 @@ namespace Protocols
     {
         static void Main(string[] args)
         {
-            TestModbusRTU();
+            TestModbusAscii();
+        }
+
+        static void TestModbusAscii()
+        {
+            var r = new ASCII(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One));
+
+
+            "读写单个寄存器".Dump("读写单个寄存器");
+            "布尔值".Dump();
+            r.WriteSingleCoil(1, 100, true).Dump();//只能写线圈
+            r.ReadCoils(1, 100, 1).Dump();//此处也只能读线圈，读离散输入无意义
+            "布尔值".Dump();
+            r.WriteSingleCoil(1, 100, false).Dump();//只能写线圈
+            r.ReadCoils(1, 100, 1).Dump();//此处也只能读线圈，读离散输入无意义
+
+            r.WriteSingleCoil(1, 100, true);
+
+
+            "写1234".Dump();
+            r.WriteMultipleRegisters<Int32>(1, (Int16)100, new Int32[] { 1234 }).Dump();
+            "读1234".Dump();
+            r.ReadHoldingRegisters<Int32>(1, (Int16)100, 1).Dump();
+
+            "写pi".Dump();
+            r.WriteMultipleRegisters<Single>(1, (Int16)100, new Single[] { 3.141592f }).Dump();
+            "读pi".Dump();
+            r.ReadHoldingRegisters<Single>(1, (Int16)100, 1).Dump();
+
+
+            "读写多个寄存器".Dump("读写多个寄存器");
+            r.WriteMultipleCoils(1, 100, new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true }).Dump();
+            r.ReadCoils(1, 100, 20).Dump();
+
+            "写1234".Dump();
+            r.WriteMultipleRegisters<Int32>(1, (Int16)100, new Int32[] { 1234, 1234, 1234, 1234, 1234 }).Dump();
+            "读1234".Dump();
+            r.ReadHoldingRegisters<Int32>(1, (Int16)100, 5).Dump();
+
+
+            "写pi".Dump();
+            r.WriteMultipleRegisters<Single>(1, (Int16)100, new Single[] { 3.141592f, 3.141592f, 3.141592f, 3.141592f, 3.141592f }).Dump();
+            "读pi".Dump();
+            r.ReadHoldingRegisters<Single>(1, (Int16)100, 5).Dump();
+
+
+            "字符串读写".Dump("字符串读写");
+            r.WriteMultipleRegisters<string>(1, 100, new string[] { "abcdefg" }).Dump();
+            r.ReadHoldingRegisters<string>(1, 100, 10).Dump();
+
+            "Done.".Dump();
+            Console.ReadLine();
         }
 
         static void TestModbusRTU()
         {
-            RTU r = new RTU(new CommSerialPort("COM1",9600,8,Parity.None,StopBits.One));
+            var r = new RTU(new CommSerialPort("COM1",9600,8,Parity.None,StopBits.One));
 
 
             "读写单个寄存器".Dump("读写单个寄存器");
