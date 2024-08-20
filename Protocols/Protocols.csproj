@@ -58,7 +58,7 @@
   <ItemGroup>
     <Compile Include="Protocols\Mit_MC_3E.cs" />
     <Compile Include="Protocols\Mit_MC_3E2.cs" />
-    <Compile Include="Protocols\ModbusRTU.cs" />
+    <Compile Include="Protocols\Modbus.cs" />
     <Compile Include="Protocols\ProtocolBase.cs" />
     <Compile Include="TestProtocol.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Protocols.Protocols
@@ -612,17 +613,18 @@ namespace Protocols.Protocols
                 && CheckCrc16(receiveData)//校验CRC16 
                 )
             {
+                var dataOffset = 3;
                 if (!typeof(T).Equals(typeof(string))) ret = new T[Count]; else { ret = new T[1]; }
-                if (typeof(T).Equals(typeof(string))) ret[0] = (T)Convert.ChangeType(Encoding.UTF8.GetString(receiveData.Skip(3).Take(Count).ToArray()), typeof(T));//字符串读只返回第一个
+                if (typeof(T).Equals(typeof(string))) ret[0] = (T)Convert.ChangeType(Encoding.UTF8.GetString(receiveData.Skip(dataOffset).Take(Count).ToArray()), typeof(T));//字符串读只返回第一个
                 else
                 {
                     for (int i = 0; i < Count; i++)
                     {
-                        if (typeof(T).Equals(typeof(Int16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToInt16(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
-                        if (typeof(T).Equals(typeof(UInt16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToUInt16(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
-                        if (typeof(T).Equals(typeof(Int32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToInt32(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
-                        if (typeof(T).Equals(typeof(UInt32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToUInt32(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
-                        if (typeof(T).Equals(typeof(Single))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToSingle(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
+                        if (typeof(T).Equals(typeof(Int16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToInt16(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(UInt16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToUInt16(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(Int32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToInt32(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(UInt32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToUInt32(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(Single))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToSingle(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
                     }
                 }
             }
@@ -900,18 +902,19 @@ namespace Protocols.Protocols
                 && CheckLRC8(receiveStr)//校验CRC16 
                 )
             {
+                int dataOffset = 3;
                 var receiveData = HexStringToByteArray(receiveStr.Remove(0, 1).Trim());
                 if (!typeof(T).Equals(typeof(string))) ret = new T[Count]; else { ret = new T[1]; }
-                if (typeof(T).Equals(typeof(string))) ret[0] = (T)Convert.ChangeType(Encoding.UTF8.GetString(receiveData.Skip(3).Take(Count).ToArray()), typeof(T));//字符串读只返回第一个
+                if (typeof(T).Equals(typeof(string))) ret[0] = (T)Convert.ChangeType(Encoding.UTF8.GetString(receiveData.Skip(dataOffset).Take(Count).ToArray()), typeof(T));//字符串读只返回第一个
                 else
                 {
                     for (int i = 0; i < Count; i++)
                     {
-                        if (typeof(T).Equals(typeof(Int16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToInt16(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
-                        if (typeof(T).Equals(typeof(UInt16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToUInt16(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
-                        if (typeof(T).Equals(typeof(Int32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToInt32(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
-                        if (typeof(T).Equals(typeof(UInt32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToUInt32(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
-                        if (typeof(T).Equals(typeof(Single))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToSingle(receiveData, i * Marshal.SizeOf<T>() + 3)), typeof(T));
+                        if (typeof(T).Equals(typeof(Int16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToInt16(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(UInt16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToUInt16(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(Int32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToInt32(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(UInt32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToUInt32(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(Single))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToSingle(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
                     }
                 }
             }
@@ -1068,6 +1071,388 @@ namespace Protocols.Protocols
         string SendAOP(string str)
         {
             return Comm.Send(str.Insert(0,":")+"\r\n");
+        }
+    }
+
+
+    internal class TCP : ModbusBase
+    {
+        public TCP(IComm comm) : base(comm)
+        {
+
+        }
+
+        protected bool CheckCrc16(byte[] data)
+        {
+            int len = data.Length;
+            var crc1 = byteCRC16(data.Take(len - 2).ToArray());
+            var crc2 = data.Skip(len - 2).Take(2).ToArray();
+            return crc1.SequenceEqual(crc2);
+
+        }
+
+        int _index = 0;
+        /// <summary>
+        /// 获取事务的序号
+        /// </summary>
+        /// <returns></returns>
+        Int16 GetIndex()
+        {
+            return (Int16)Interlocked.Increment(ref _index);
+        }
+
+        protected override bool[] ReadCoils(int StationNumber, byte FunctionCode, int Address, int Count)
+        {            
+            bool[] ret = Array.Empty<bool>();
+            var msHead = new MemoryStream();
+            var msData = new MemoryStream();
+
+            //报文头
+            //获取唯一的事务序列号
+            Int16 index = GetIndex();
+            var tmp = BitConverter.GetBytes(index);
+            Array.Reverse(tmp);
+            msHead.Write(tmp, 0, tmp.Length);
+
+            //协议标识符
+            byte[] ModbusFlag = new byte[] { 0x00,0x00};
+            msHead.Write(ModbusFlag, 0, ModbusFlag.Length);
+
+
+            //报文数据部分
+            //从站地址-单元标识符
+            var sn = (byte)StationNumber;
+            msData.WriteByte(sn);
+
+            //功能码
+            msData.WriteByte(FunctionCode);
+
+            //寄存器地址
+            var adr = BitConverter.GetBytes((Int16)Address);
+            Array.Reverse(adr);//转换为大端
+            msData.Write(adr, 0, adr.Length);
+
+            //寄存器个数
+            var n = BitConverter.GetBytes((Int16)Count);
+            Array.Reverse(n);//转换为大端
+            msData.Write(n, 0, n.Length);
+
+            var data=msData.ToArray();
+            //写数据长度
+            var dataLen=BitConverter.GetBytes((Int16)data.Length);
+            Array.Reverse(dataLen);
+            msHead.Write(dataLen, 0, dataLen.Length);
+
+            //附加数据
+            msHead.Write(data, 0, data.Length);
+
+            //发送数据
+            var sendData = msHead.ToArray();
+            var receiveData = Comm.Send(sendData);             
+
+            //解析接受数据
+            if (receiveData != null //判断是否为空
+                && receiveData.Length >= 6 //判断长度
+                && receiveData.Take(4).SequenceEqual(sendData.Take(4)) //比较文件头-事务和协议标识符 
+                )
+            {
+                ret = new bool[Count];
+                int dataOffset = 9;
+                int j = 0;
+                byte value = receiveData[dataOffset];
+                for (int i = 0; i < Count; i++)
+                {
+                    ret[i] = value % 2 == 1;//返回的每个位占用一个字节，true=0x01,false=0x00
+                    value /= 2;
+                    j++;
+                    if (j >= 8)
+                    {
+                        value = receiveData[++dataOffset];
+                        j = 0;
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        protected override T[] ReadRegisters<T>(int StationNumber, byte FunctionCode, int Address, int Count)
+        {
+            T[] ret = Array.Empty<T>();
+            var msHead = new MemoryStream();
+            var msData = new MemoryStream();
+
+            //报文头
+            //获取唯一的事务序列号
+            Int16 index = GetIndex();
+            var tmp = BitConverter.GetBytes(index);
+            Array.Reverse(tmp);
+            msHead.Write(tmp, 0, tmp.Length);
+
+            //协议标识符
+            byte[] ModbusFlag = new byte[] { 0x00, 0x00 };
+            msHead.Write(ModbusFlag, 0, ModbusFlag.Length);
+
+
+            //报文数据部分
+            //从站地址-单元标识符
+            var sn = (byte)StationNumber;
+            msData.WriteByte(sn);
+
+            //功能码
+            msData.WriteByte(FunctionCode);
+
+            //寄存器地址
+            var adr = BitConverter.GetBytes((Int16)Address);
+            Array.Reverse(adr);//转换为大端
+            msData.Write(adr, 0, adr.Length);
+
+
+            //长度
+            if (!typeof(T).Equals(typeof(string)))
+            {
+                var n = BitConverter.GetBytes((Int16)(Count * Marshal.SizeOf<T>() / 2));
+                Array.Reverse(n);//转换为大端
+                msData.Write(n, 0, n.Length);
+            }
+            else
+            {
+                var n = BitConverter.GetBytes((Int16)(Count));
+                Array.Reverse(n);//转换为大端
+                msData.Write(n, 0, n.Length);
+            }
+
+            var data = msData.ToArray();
+            //写数据长度
+            var dataLen = BitConverter.GetBytes((Int16)data.Length);
+            Array.Reverse(dataLen);
+            msHead.Write(dataLen, 0, dataLen.Length);
+
+            //附加数据
+            msHead.Write(data, 0, data.Length);
+
+            //发送数据
+            var sendData = msHead.ToArray();
+            var receiveData = Comm.Send(sendData);
+
+            //解析接受数据
+            if (receiveData != null //判断是否为空
+                && receiveData.Length >= 6 //判断长度
+                && receiveData.Take(4).SequenceEqual(sendData.Take(4)) //比较文件头-事务和协议标识符 
+                )
+            {
+                int dataOffset = 9;
+                if (!typeof(T).Equals(typeof(string))) ret = new T[Count]; else { ret = new T[1]; }
+                if (typeof(T).Equals(typeof(string))) ret[0] = (T)Convert.ChangeType(Encoding.UTF8.GetString(receiveData.Skip(dataOffset).Take(Count).ToArray()), typeof(T));//字符串读只返回第一个
+                else
+                {
+                    for (int i = 0; i < Count; i++)
+                    {
+                        if (typeof(T).Equals(typeof(Int16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToInt16(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(UInt16))) ret[i] = (T)Convert.ChangeType(ToBigEndian(BitConverter.ToUInt16(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(Int32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToInt32(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(UInt32))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToUInt32(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                        if (typeof(T).Equals(typeof(Single))) ret[i] = (T)Convert.ChangeType(ToLocalEndian(BitConverter.ToSingle(receiveData, i * Marshal.SizeOf<T>() + dataOffset)), typeof(T));
+                    }
+                }
+            }
+
+            return ret;
+
+        }
+
+        protected override bool WriteCoils(int StationNumber, byte FunctionCode, int Address, bool[] Values)
+        {
+            var msHead = new MemoryStream();
+            var msData = new MemoryStream();
+
+            //报文头
+            //获取唯一的事务序列号
+            Int16 index = GetIndex();
+            var tmp = BitConverter.GetBytes(index);
+            Array.Reverse(tmp);
+            msHead.Write(tmp, 0, tmp.Length);
+
+            //协议标识符
+            byte[] ModbusFlag = new byte[] { 0x00, 0x00 };
+            msHead.Write(ModbusFlag, 0, ModbusFlag.Length);
+
+
+            //报文数据部分
+            //从站地址-单元标识符
+            var sn = (byte)StationNumber;
+            msData.WriteByte(sn);
+
+            //功能码
+            msData.WriteByte(FunctionCode);
+
+            //寄存器起始地址
+            var adr = BitConverter.GetBytes((Int16)Address);
+            Array.Reverse(adr);//转换为大端
+            msData.Write(adr, 0, adr.Length);
+
+            //写单个
+            if (FunctionCode == 0x05)
+            {
+                //寄存器个数
+                //var adrLen=BitConverter.GetBytes((Int16)Values.Length);
+                //Array.Reverse(adrLen);
+                //msData.Write(adrLen,0,adrLen.Length);                
+
+                //数据
+                var d = BitConverter.GetBytes((Int16)(Values[0] == true ? 0xFF : 0x00));
+
+                ////写数据字节长度
+                //msData.WriteByte((byte)d.Length);
+
+                //写数据
+                msData.WriteByte(d.FirstOrDefault());
+
+                msData.WriteByte((byte)0x00);
+            }
+            else
+            {
+                //寄存器个数
+                var adrLen = BitConverter.GetBytes((Int16)Values.Length);
+                Array.Reverse(adrLen);
+                msData.Write(adrLen, 0, adrLen.Length);
+
+                //将布尔数组转换为字节数组
+                var d = BoolArrayToByteArray(Values);
+
+                //写数据字节长度
+                msData.WriteByte((byte)d.Length);
+
+                //写数据
+                msData.Write(d,0,d.Length);
+            }
+
+            var data = msData.ToArray();
+            //写数据长度
+            var dataLen = BitConverter.GetBytes((Int16)data.Length);
+            Array.Reverse(dataLen);
+            msHead.Write(dataLen, 0, dataLen.Length);
+
+            //附加数据
+            msHead.Write(data, 0, data.Length);
+
+            //发送数据
+            var sendData = msHead.ToArray();
+            var receiveData = Comm.Send(sendData);
+
+            //解析接受数据
+            if (receiveData != null //判断是否为空
+                && receiveData.Length >= 6 //判断长度
+                && receiveData.Take(4).SequenceEqual(sendData.Take(4)) //比较文件头-事务和协议标识符 
+                )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected override bool WriteRegisters<T>(int StationNumber, byte FunctionCode, int Address, T[] Values)
+        {
+            string str = "";
+            if (typeof(T).Equals(typeof(string))) str = Values.FirstOrDefault() as string; 
+
+            var msHead = new MemoryStream();
+            var msData = new MemoryStream();
+
+            //报文头
+            //获取唯一的事务序列号
+            Int16 index = GetIndex();
+            var tmp = BitConverter.GetBytes(index);
+            Array.Reverse(tmp);
+            msHead.Write(tmp, 0, tmp.Length);
+
+            //协议标识符
+            byte[] ModbusFlag = new byte[] { 0x00, 0x00 };
+            msHead.Write(ModbusFlag, 0, ModbusFlag.Length);
+
+            //报文数据部分
+            //从站地址-单元标识符
+            var sn = (byte)StationNumber;
+            msData.WriteByte(sn);
+
+            //功能码
+            msData.WriteByte(FunctionCode);
+
+            //寄存器起始地址
+            var adr = BitConverter.GetBytes((Int16)Address);
+            Array.Reverse(adr);//转换为大端
+            msData.Write(adr, 0, adr.Length);
+
+            
+            if (!typeof(T).Equals(typeof(string)))
+            {
+                //写入寄存器数量
+                var count = BitConverter.GetBytes((Int16)(Values.Length * Marshal.SizeOf<T>() / 2));
+                Array.Reverse(count);
+                msData.Write(count, 0, count.Length);
+                
+                //数据长度
+                var length = (byte)(Values.Length * Marshal.SizeOf<T>());
+                msData.WriteByte(length);
+            }
+            else
+            {
+                //写入寄存器数量
+                var count = BitConverter.GetBytes((Int16)((str).Length / 2));
+                Array.Reverse(count);
+                msData.Write(count, 0, count.Length);
+
+                //数据长度
+                var length = (byte)(str.Length);
+                msData.WriteByte(length);
+            }             
+
+            //写内容
+            if (typeof(T).Equals(typeof(string)))
+            {
+                byte[] d = null;
+                d = Encoding.UTF8.GetBytes(str);
+                msData.Write(d, 0, d.Length);
+            }
+            else
+            {
+                foreach (var value in Values)
+                {
+                    byte[] d = null;
+                    if (typeof(T).Equals(typeof(Int16))) d = BitConverter.GetBytes(ToBigEndian((Int16)Convert.ChangeType(value, typeof(Int16))));
+                    if (typeof(T).Equals(typeof(UInt16))) d = BitConverter.GetBytes(ToBigEndian((UInt16)Convert.ChangeType(value, typeof(UInt16))));
+                    if (typeof(T).Equals(typeof(Int32))) d = BitConverter.GetBytes(ToLocalEndian((Int32)Convert.ChangeType(value, typeof(Int32))));
+                    if (typeof(T).Equals(typeof(UInt32))) d = BitConverter.GetBytes(ToLocalEndian((UInt32)Convert.ChangeType(value, typeof(UInt32))));
+                    if (typeof(T).Equals(typeof(Single))) d = BitConverter.GetBytes(ToLocalEndian((Single)Convert.ChangeType(value, typeof(Single))));
+
+                    msData.Write(d, 0, d.Length);
+                }
+            }
+
+            var data = msData.ToArray();
+            //写数据长度
+            var dataLen = BitConverter.GetBytes((Int16)data.Length);
+            Array.Reverse(dataLen);
+            msHead.Write(dataLen, 0, dataLen.Length);
+
+            //附加数据
+            msHead.Write(data, 0, data.Length);
+
+            //发送数据
+            var sendData = msHead.ToArray();
+            var receiveData = Comm.Send(sendData);
+
+            //解析接受数据
+            if (receiveData != null //判断是否为空
+                && receiveData.Length >= 6 //判断长度
+                && receiveData.Take(4).SequenceEqual(sendData.Take(4)) //比较文件头-事务和协议标识符 
+                )
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

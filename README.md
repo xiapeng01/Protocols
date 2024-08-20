@@ -4,7 +4,7 @@
 目前只支持TCP方式和串口方式，欢迎反馈bug   
 感谢拓拓，SlimeNull，Steve，林德熙，雾雨氏Bot，仙女之萌，Shompinice提供的帮助！   
 20240819：增加ModbusRTU。    
-20240820：增加了ModbusASCII
+20240820：增加ModbusASCII，ModbusTCP。
 ```
                 //字符串拼接方式
                 MC_3E mc = new MC_3E("127.0.0.1", 6000);
