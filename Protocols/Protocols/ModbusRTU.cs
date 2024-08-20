@@ -49,7 +49,23 @@ namespace Protocols.Protocols
             return BitConverter.GetBytes(crc);
         }
 
-        //各基本类型的大小端转换，大转小，小转大方法相同
+        protected byte[] BoolArrayToByteArray(bool[] boolArray)
+        {
+            int bytesLength = (boolArray.Length + 7) / 8;    //计算字节长度喵
+            byte[] byteArray = new byte[bytesLength];
+            for (int i = 0; i < boolArray.Length; i++)
+            {
+                if (boolArray[i])
+                {
+                    int byteIndex = i / 8;              //确定目标byte喵
+                    int bitIndex = i % 8;               //确定bit的位置喵
+                    byteArray[byteIndex] |= (byte)(1 << bitIndex); //使用位运算将bit设置为1喵
+                }
+            }
+            return byteArray;
+        }
+
+         //各基本类型的大小端转换，大转小，小转大方法相同
         protected UInt16 ToBigEndian(UInt16 Dat)
         {
             return BitConverter.ToUInt16(BitConverter.GetBytes(Dat).Reverse().ToArray(), 0);
@@ -498,9 +514,19 @@ namespace Protocols.Protocols
                 )
             {
                 ret=new bool[Count];
+                int dataOffset = 3;
+                int j = 0;
+                byte value = receiveData[dataOffset];
                 for (int i = 0; i < Count; i++)
                 {
-                    ret[i] = receiveData[i+3]>0;//返回的每个位占用一个字节，true=0x01,false=0x00
+                    ret[i] = value % 2 ==1;//返回的每个位占用一个字节，true=0x01,false=0x00
+                    value /= 2;
+                    j++;
+                    if(j>=8)
+                    {
+                        value = receiveData[++dataOffset];
+                        j = 0;
+                    }
                 }
             }
 
@@ -591,16 +617,16 @@ namespace Protocols.Protocols
             }
             else
             {
-                throw new InvalidOperationException("暂不支持此操作！");
-                //线圈数
-                var count = BitConverter.GetBytes(ToBigEndian(Values.Length));
-                ms.Write(count, 0, count.Length);
+                var data= BoolArrayToByteArray(Values);
 
-                UInt16 value = 0;
-                //数据字节数
-                int n=Values.Length %16==0 ? Values.Length :(Values.Length/16+1)*16;
-                Enumerable.Range(0, n).Select(a => Values.Skip(a * 16).Take(16).ToArray());
-                
+                var len1 = BitConverter.GetBytes((Int16)(Values.Length));
+                Array.Reverse(len1);
+                ms.Write(len1,0,len1.Length);
+
+                var len2=(byte)data.Length;
+                ms.WriteByte(len2);
+
+                ms.Write(data, 0, data.Length);                 
             }
 
 

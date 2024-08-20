@@ -30,6 +30,9 @@ namespace Protocols
             r.WriteSingleCoil(1, 100, false).Dump();//只能写线圈
             r.ReadCoils(1, 100, 1).Dump();//此处也只能读线圈，读离散输入无意义
 
+            r.WriteSingleCoil(1, 100, true);
+
+
             "写1234".Dump();
             r.WriteMultipleRegisters<Int32>(1, (Int16)100, new Int32[] { 1234 }).Dump();
             "读1234".Dump();
@@ -41,12 +44,9 @@ namespace Protocols
             r.ReadHoldingRegisters<Single>(1, (Int16)100, 1).Dump();
 
 
-
-
-
             "读写多个寄存器".Dump("读写多个寄存器");
-            //r.WriteMultipleCoils(1, 100, new bool[] { true, false, true, false, true }).Dump();
-            //r.ReadCoils(1, 100, 5).Dump() ;
+            r.WriteMultipleCoils(1, 100, new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true }).Dump();
+            r.ReadCoils(1, 100, 20).Dump() ;
 
             "写1234".Dump();
             r.WriteMultipleRegisters<Int32>(1, (Int16)100, new Int32[] { 1234,1234,1234,1234,1234 }).Dump();
