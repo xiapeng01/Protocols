@@ -200,23 +200,23 @@ namespace Protocols
         //抽象类的抽象方法必须由子类实现，虚方法可以在只有需要的时候才实现。
         //bool读写
         public virtual bool[] ReadBool(string regName, int Address, int Count) { throw new Exception("此方法需由子类实现！"); }
-        public virtual bool WriteBool(string regName, int Address, bool[] values) { throw new Exception("此方法需由子类实现！"); }
+        public virtual bool WriteBool(string regName, int Address, bool[] Values) { throw new Exception("此方法需由子类实现！"); }
 
         //16位读写
         public virtual Int16[] ReadInt16(string regName, int Address, int Count) { throw new Exception("此方法需由子类实现！"); }
-        public virtual bool WriteInt16(string regName, int Address, Int16[] values) { throw new Exception("此方法需由子类实现！"); }
+        public virtual bool WriteInt16(string regName, int Address, Int16[] Values) { throw new Exception("此方法需由子类实现！"); }
         public virtual UInt16[] ReadUInt16(string regName, int Address, int Count) { throw new Exception("此方法需由子类实现！"); }
-        public virtual bool WriteUInt16(string regName, int Address, UInt16[] values) { throw new Exception("此方法需由子类实现！"); }
+        public virtual bool WriteUInt16(string regName, int Address, UInt16[] Values) { throw new Exception("此方法需由子类实现！"); }
 
         //32位读写
         public virtual Int32[] ReadInt32(string regName, int Address, int Count) { throw new Exception("此方法需由子类实现！"); }
-        public virtual bool WriteInt32(string regName, int Address, Int32[] values) { throw new Exception("此方法需由子类实现！"); }
+        public virtual bool WriteInt32(string regName, int Address, Int32[] Values) { throw new Exception("此方法需由子类实现！"); }
         public virtual UInt32[] ReadUInt32(string regName, int Address, int Count) { throw new Exception("此方法需由子类实现！"); }
-        public virtual bool WriteUInt32(string regName, int Address, UInt32[] values) { throw new Exception("此方法需由子类实现！"); }
+        public virtual bool WriteUInt32(string regName, int Address, UInt32[] Values) { throw new Exception("此方法需由子类实现！"); }
         public virtual Single[] ReadSingle(string regName, int Address, int Count) { throw new Exception("此方法需由子类实现！"); }
-        public virtual bool WriteSingle(string regName, int Address, Single[] values) { throw new Exception("此方法需由子类实现！"); }
+        public virtual bool WriteSingle(string regName, int Address, Single[] Values) { throw new Exception("此方法需由子类实现！"); }
         public virtual string ReadString(string regName, int Address, int Count) { throw new Exception("此方法需由子类实现！"); }
-        public virtual bool WriteString(string regName, int Address, string values) { throw new Exception("此方法需由子类实现！"); }
+        public virtual bool WriteString(string regName, int Address, string Values) { throw new Exception("此方法需由子类实现！"); }
 
         //泛型版本
         public T ReadData<T>(string regName, int Address)
