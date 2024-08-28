@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Protocols
 {
     //包含基本方法的基类-本类只能被继承，不能直接创建实例
-    internal abstract class ProtocolBase
+    public abstract class ProtocolBase
     {
+        public enum FrameFormatEnum { ABCD, BADC, CDAB, DCBA }//4种字节格式
         protected IComm _comm;
+        public FrameFormatEnum FrameFormat { get; set; } = FrameFormatEnum.DCBA;//默认的帧格式
+
         public ProtocolBase(IComm comm)
         {
             _comm = comm;
         }
+
         //工具方法组
         //十六进制字符串转字节数组
         protected byte[] HexStringToByteArray(string str)
@@ -119,6 +125,145 @@ namespace Protocols
                 }
             }
             return ret.ToString();
+        }
+
+        protected void ByteArraySwap(ref byte[] data)
+        {  
+            byte tmp;
+            for (int i = 0; i < data.Length; i += 2)
+            {
+                tmp = data[i];
+                data[i] = data[i + 1];
+                data[i + 1] = tmp;
+            } 
+        }
+
+
+        ////
+        protected Int32 ToLocalEndian(Int32 data)
+        {
+            var source = BitConverter.GetBytes(data);
+            byte[] dst = new byte[4];
+            switch (FrameFormat)
+            {
+                default:
+                case FrameFormatEnum.DCBA:
+                    {
+                        dst[0] = source[0];
+                        dst[1] = source[1];
+                        dst[2] = source[2];
+                        dst[3] = source[3];
+                        return BitConverter.ToInt32(dst, 0);
+                    }
+                case FrameFormatEnum.CDAB:
+                    {
+                        dst[0] = source[1];
+                        dst[1] = source[0];
+                        dst[2] = source[3];
+                        dst[3] = source[2];
+                        return BitConverter.ToInt32(dst, 0);
+                    }
+                case FrameFormatEnum.BADC:
+                    {
+                        dst[0] = source[2];
+                        dst[1] = source[3];
+                        dst[2] = source[0];
+                        dst[3] = source[1];
+                        return BitConverter.ToInt32(dst, 0);
+                    }
+                case FrameFormatEnum.ABCD:
+                    {
+                        dst[0] = source[3];
+                        dst[1] = source[2];
+                        dst[2] = source[1];
+                        dst[3] = source[0];
+                        return BitConverter.ToInt32(dst, 0);
+                    }
+            }
+        }
+
+        protected UInt32 ToLocalEndian(UInt32 data)
+        {
+            var source = BitConverter.GetBytes(data);
+            byte[] dst = new byte[4];
+            switch (FrameFormat)
+            {
+                default:
+                case FrameFormatEnum.DCBA:
+                    {
+                        dst[0] = source[0];
+                        dst[1] = source[1];
+                        dst[2] = source[2];
+                        dst[3] = source[3];
+                        return BitConverter.ToUInt32(dst, 0);
+                    }
+                case FrameFormatEnum.CDAB:
+                    {
+                        dst[0] = source[1];
+                        dst[1] = source[0];
+                        dst[2] = source[3];
+                        dst[3] = source[2];
+                        return BitConverter.ToUInt32(dst, 0);
+                    }
+                case FrameFormatEnum.BADC:
+                    {
+                        dst[0] = source[2];
+                        dst[1] = source[3];
+                        dst[2] = source[0];
+                        dst[3] = source[1];
+                        return BitConverter.ToUInt32(dst, 0);
+                    }
+                case FrameFormatEnum.ABCD:
+                    {
+                        dst[0] = source[3];
+                        dst[1] = source[2];
+                        dst[2] = source[1];
+                        dst[3] = source[0];
+                        return BitConverter.ToUInt32(dst, 0);
+                    }
+            }
+        }
+
+        protected Single ToLocalEndian(Single data)
+        {
+            var source = BitConverter.GetBytes(data);
+            byte[] dst = new byte[4];
+            switch (FrameFormat)
+            {
+                default:
+                case FrameFormatEnum.DCBA:
+                    {
+                        dst[0] = source[0];
+                        dst[1] = source[1];
+                        dst[2] = source[2];
+                        dst[3] = source[3];
+                        return BitConverter.ToSingle(dst, 0);
+                    }
+                case FrameFormatEnum.CDAB:
+                    {
+                        dst[0] = source[1];
+                        dst[1] = source[0];
+                        dst[2] = source[3];
+                        dst[3] = source[2];
+                        return BitConverter.ToSingle(dst, 0);
+                    }
+                case FrameFormatEnum.BADC:
+                    {
+                        dst[0] = source[2];
+                        dst[1] = source[3];
+                        dst[2] = source[0];
+                        dst[3] = source[1];
+                        return BitConverter.ToSingle(dst, 0);
+                    }
+                case FrameFormatEnum.ABCD:
+                    {
+                        dst[0] = source[3];
+                        dst[1] = source[2];
+                        dst[2] = source[1];
+                        dst[3] = source[0];
+                        return BitConverter.ToSingle(dst, 0);
+                    }
+            }
         }
 
         //字节数组比较

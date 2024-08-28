@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ConsoleDump;
 using Protocols.Protocols;
-
+using Protocols.Protocols.Omron;
 namespace Protocols
 {
     internal class TestProtocol
@@ -15,14 +15,77 @@ namespace Protocols
         static void Main(string[] args)
         {
             //TestMC(new MC_3E("127.0.0.1", 6000));
-            TestMewtocol(new Mewtocol(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
-             
+
+            //TestMewtocol(new Mewtocol(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
+
+            //TestOmron(new HostLink_Serial(new CommSerialPort("COM1", 9600, 7, Parity.Even, StopBits.One)));
+            TestMC(new HostLink_Serial(new CommSerialPort("COM1", 9600, 7, Parity.Even, StopBits.One)));
+
             //TestModbus(new ASCII(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
             //TestModbus(new RTU(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
             //TestModbus(new TCP(new CommNet("127.0.0.1", 502)));
-             
+
         }
 
+        static void TestOmron(ProtocolBase m)
+        {
+            //单个读写
+            //布尔读写
+            m.WriteBool("D", 10000, true).Dump("WriteBool");
+            m.ReadBool("D", 10000).Dump("ReadBool");
+
+            //16位读写
+            m.WriteInt16("D", 100, -1).Dump("WriteInt16");
+            m.ReadInt16("D", 100).Dump("ReadInt16");
+
+            m.WriteUInt16("D", 100, 1).Dump("WriteUInt16");
+            m.ReadUInt16("D", 100).Dump("ReadUInt16");
+
+            //32位读写
+            m.WriteInt32("D", 100, -1111).Dump("WriteInt32");
+            m.ReadInt32("D", 100).Dump("ReadInt32");
+
+            m.WriteUInt32("D", 100, 1111).Dump("WriteUInt32");
+            m.ReadUInt32("D", 100).Dump("ReadUInt32");
+
+            //浮点数读写
+            m.WriteSingle("D", 100, -11.11f).Dump("WriteSingle");
+            m.ReadSingle("D", 100).Dump("ReadSingle");
+
+            //字符串读写
+            m.WriteString("D", 100, "abcdefghijklmnopqrstuvwxyz").Dump("WriteString");
+            m.ReadString("D", 100, 26).Dump("ReadString");
+
+            //多个读写
+            //布尔读写
+            m.WriteBool("D", 10000, new bool[] { true,false,true,false,true }).Dump("WriteBool");
+            m.ReadBool("D", 10000, 5).Dump("ReadBool");
+
+            //16位读写
+            m.WriteInt16("D",100,new short[] {-11,-22,-33,-44,-55 }).Dump("WriteInt16");
+            m.ReadInt16("D", 100, 5).Dump("ReadInt16");
+
+            m.WriteUInt16("D", 100, new ushort[] { 11, 22, 33, 44, 55 }).Dump("WriteUInt16");
+            m.ReadUInt16("D", 100, 5).Dump("ReadUInt16");
+
+            //32位读写
+            m.WriteInt32("D", 100, new int[] { -1111, -2222, -3333, -4444, -5555 }).Dump("WriteInt32");
+            m.ReadInt32("D", 100, 5).Dump("ReadInt32");
+
+            m.WriteUInt32("D", 100, new uint[] { 1111, 2222, 3333, 4444, 5555 }).Dump("WriteUInt32");
+            m.ReadUInt32("D", 100, 5).Dump("ReadUInt32");
+
+            //浮点数读写
+            m.WriteSingle("D", 100, new float[] { -11.11f, -22.22f, -33.33f, -44.44f, -55.55f }).Dump("WriteSingle");
+            m.ReadSingle("D", 100, 5).Dump("ReadSingle");
+
+            //字符串读写
+            m.WriteString("D", 100, "abcdefghijklmnopqrstuvwxyz").Dump("WriteString");
+            m.ReadString("D", 100, 26).Dump("ReadString");
+
+            Console.Read();
+
+        }
 
 
         static void TestModbus(ModbusBase m)

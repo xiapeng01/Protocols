@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Protocols.Protocols
 {
-    internal abstract class ModbusBase 
+    public abstract class ModbusBase 
     {
         protected IComm Comm;
         public ModbusBase(IComm comm) 
@@ -169,6 +169,7 @@ namespace Protocols.Protocols
                     }
             }
         }
+
         protected UInt32 ToLocalEndian(UInt32 data)
         {
             var source = BitConverter.GetBytes(data);
@@ -496,7 +497,7 @@ namespace Protocols.Protocols
 
     }
 
-    internal class RTU : ModbusBase
+    public class RTU : ModbusBase
     {
         public RTU(IComm comm) : base(comm)
         {
@@ -778,7 +779,7 @@ namespace Protocols.Protocols
     }
 
 
-    internal class ASCII : ModbusBase
+    public class ASCII : ModbusBase
     {
         public ASCII(IComm comm) : base(comm)
         {
@@ -1075,7 +1076,7 @@ namespace Protocols.Protocols
     }
 
 
-    internal class TCP : ModbusBase
+    public class TCP : ModbusBase
     {
         public TCP(IComm comm) : base(comm)
         {

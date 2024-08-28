@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Protocols
 {
-    internal class MC_3Ebase : ProtocolBase
+    public class MC_3Ebase : ProtocolBase
     {
         const int iHeadFrameLength = 32;
         const int iDataFrameLength = 64;
@@ -607,7 +607,7 @@ namespace Protocols
     }
 
     //为保持兼容而封装的密封类
-    internal sealed class MC_3E : MC_3Ebase
+    public sealed class MC_3E : MC_3Ebase
     {
         //以太网方式
         //最简构造函数

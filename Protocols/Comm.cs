@@ -13,7 +13,7 @@ using System.Data;
 namespace Protocols
 {
     //基本的接口
-    internal interface IComm
+    public interface IComm
     {
         string Send(string str);
         byte[] Send(byte[] sendData);
@@ -21,7 +21,7 @@ namespace Protocols
     }
 
     //为减少代码重写的抽象类
-    internal abstract class AComm : IComm
+    public abstract class AComm : IComm
     {
         protected int waitReadDelay = 0;
         private int bufferSize = 1024;
@@ -90,7 +90,7 @@ namespace Protocols
     }
 
     //通讯层父类-可选串口或以太网
-    internal class CommNet : AComm, IComm
+    public class CommNet : AComm, IComm
     {
         private string _ip;
         private int _port;
@@ -146,7 +146,7 @@ namespace Protocols
     }
 
     //通讯层父类-可选串口或以太网
-    internal class CommSerialPort : AComm, IComm
+    public class CommSerialPort : AComm, IComm
     {
         private string _portName;
         private int _baudRate;

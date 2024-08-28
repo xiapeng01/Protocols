@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace Protocols.Protocols
 {
-    internal class Mewtocol : ProtocolBase
+    public class Mewtocol : ProtocolBase
     { 
         private readonly object Lock_Serial = new object();
         private readonly object LogFile = new object();
