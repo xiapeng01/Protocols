@@ -9,19 +9,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.Remoting.Messaging;
 using System.Data;
+using System.Net;
 
 namespace Protocols
 {
     //基本的接口
-    public interface IComm
+    public interface IComm:IDisposable
     {
         string Send(string str);
         byte[] Send(byte[] sendData);
+        byte[] Send(Action<Stream> action, byte[] sendData);
         Task<byte[]> SendAsync(byte[] sendData);
+        void Close();
     }
 
     //为减少代码重写的抽象类
-    public abstract class AComm : IComm
+    public abstract class AComm : IComm, IDisposable
     {
         protected int waitReadDelay = 0;
         private int bufferSize = 1024;
@@ -29,6 +32,7 @@ namespace Protocols
         private static int _minSemaphore = 1;
         private static int _maxSemaphore = 1;
         protected abstract Stream GetStream();
+        protected abstract Stream GetStream(Action<Stream> action);
 
         /// <summary>
         /// 经过包装的字符串格式发送接收方法
@@ -39,7 +43,12 @@ namespace Protocols
         {
             return Encoding.UTF8.GetString(Send(Encoding.UTF8.GetBytes(str)));
         }
-        //发送和接收数据
+
+        /// <summary>
+        /// 通用场景的收发方法
+        /// </summary>
+        /// <param name="sendData"></param>
+        /// <returns></returns>
         public byte[] Send(byte[] sendData)
         {
             byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
@@ -47,6 +56,46 @@ namespace Protocols
             var s = GetStream();
             s.Write(sendData, 0, sendData.Length);
             Thread.Sleep(waitReadDelay); 
+            int n = s.Read(ret, 0, ret.Length);
+            sem.Release();
+            Array.Resize(ref ret, n);
+            return ret;
+        }
+
+        /// <summary>
+        /// 指定Stream的版本，用于特定情况下发送握手包的场景
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="sendData"></param>
+        /// <returns></returns>
+        public byte[] Send(Stream s,byte[] sendData)
+        {
+            byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内
+            //sem.Wait();//限制并发连接数                 
+            s.Write(sendData, 0, sendData.Length);
+            Thread.Sleep(waitReadDelay);
+            int n = s.Read(ret, 0, ret.Length);
+            //sem.Release();
+            Array.Resize(ref ret, n);
+            return ret;
+        }
+
+        /// <summary>
+        /// 带一个委托的收发方法，适用于需要额外握手的协议
+        /// </summary>
+        /// <param name="sendData"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public byte[] Send(Action<Stream> action,byte[] sendData)
+        {
+            byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内 
+            sem.Wait();//限制并发连接数
+            var s = GetStream(action);
+
+            //var s1 = BitConverter.ToString(sendData).Replace("-"," ");
+
+            s.Write(sendData, 0, sendData.Length);
+            Thread.Sleep(waitReadDelay);
             int n = s.Read(ret, 0, ret.Length);
             sem.Release();
             Array.Resize(ref ret, n);
@@ -87,6 +136,8 @@ namespace Protocols
                 }                
             });            
         }
+        public abstract void Close();
+        public abstract void Dispose();  
     }
 
     //通讯层父类-可选串口或以太网
@@ -96,9 +147,11 @@ namespace Protocols
         private int _port;
         private int _timeOut = 1000;
 
-        private TcpClient client = new TcpClient();
+        private TcpClient client =null;
         readonly object lckObj = new Object();
 
+        public string LocalIp = "";
+        public string RemoteIp = "";
 
         //带IP，端口号设置的构造函数
         public CommNet(string ip, int port)
@@ -140,7 +193,66 @@ namespace Protocols
                 client.ReceiveTimeout = _timeOut;
                 if (!client.Connected) client.Connect(_ip, _port);
                 if (client.Connected) return client.GetStream();
+
+                LocalIp = ((IPEndPoint)client.Client.LocalEndPoint).Address.ToString();
+                RemoteIp = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 获取连接的Stream，带委托的版本，适用于需要独立握手的协议
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        protected override Stream GetStream(Action<Stream> action)
+        {
+            lock (lckObj)
+            {
+                waitReadDelay = 0;
+                if (client == null)
+                {
+                    client = new TcpClient();
+                    client.Connect(_ip, _port);
+                    LocalIp = ((IPEndPoint)client.Client.LocalEndPoint).Address.ToString();
+                    RemoteIp = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
+
+                    //应在此时调用父类的方法发送握手包
+                    if (client.Connected)
+                    {
+                        action?.Invoke(client.GetStream());//调用委托发送握手包
+                    }
+                }
+                
+                if (!client.Connected) client.Connect(_ip, _port);
+                if (client.Connected)
+                {
+                    client.ReceiveTimeout = _timeOut;
+
+                    return client.GetStream();
+                }
+
+                
+                return null;
+            }
+        }
+
+        public override void Close()
+        {
+            if (client != null && client.Connected) client?.Close(); 
+        }
+
+        public override void Dispose()
+        {            
+            try
+            {                
+                client?.Close();
+                client?.Dispose();
+                client = null;
+            }
+            catch (Exception)
+            {
+                //throw;
             }
         }
     }
@@ -193,8 +305,8 @@ namespace Protocols
 
         ~CommSerialPort()
         {
-            sp.Close();
-            sp.Dispose();
+            sp?.Close();
+            sp?.Dispose();
         }
 
         //获取Tcp连接的Stream
@@ -221,9 +333,50 @@ namespace Protocols
                 return sp.BaseStream;
             }
         }
+
+        public override void Close()
+        {
+            if (sp != null && sp.IsOpen) sp?.Close();  
+        }
+
+        public override void Dispose()
+        {
+            try
+            { 
+                sp?.Close();
+                sp?.Dispose();
+                sp = null;
+            }
+            catch (Exception)
+            {
+
+                //throw;
+            }
+        }
+
+        protected override Stream GetStream(Action<Stream> action)
+        {
+            throw new Exception("串口方式不支持此方法！");
+            lock (lckObj)
+            {
+                waitReadDelay = 50;
+                //判断串口是否存在
+                var ports = SerialPort.GetPortNames();
+                if (!ports.Any(p => p.Contains(_portName))) throw new InvalidDataException($"串口:{_portName}不存在");
+                if (sp == null)
+                {
+                    sp = new SerialPort();
+                    sp.PortName = _portName;
+                    sp.BaudRate = _baudRate;
+                    sp.DataBits = _dataBits;
+                    sp.Parity = _parity;
+                    sp.StopBits = _stopBits;
+                }
+                if (!sp.IsOpen) sp.Open();
+                sp.WriteTimeout = _timeOut;
+                sp.ReadTimeout = _timeOut; 
+                return sp.BaseStream;
+            }
+        }
     }
-
-
-
-
 }

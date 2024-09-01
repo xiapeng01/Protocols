@@ -12,8 +12,9 @@ Steve(https://github.com/steveworkshop)
 Shompinice(https://github.com/MicaApps)   
       
 20240819：增加ModbusRTU。    
-20240820：增加ModbusASCII，ModbusTCP，增加松下Mewtocol（写多个位时还有bug未修复）！
-20240828：调整了结构，并增加欧姆龙HostLink_Serial方式（使用头编码FA），其余头编码和Fins方式待后续添加
+20240820：增加ModbusASCII，ModbusTCP，增加松下Mewtocol（写多个位时还有bug未修复）！   
+20240828：调整了结构，并增加欧姆龙HostLink_Serial方式（使用头编码FA），其余头编码和Fins方式待后续添加   
+20240901：增加了欧姆龙FinsTCP方式
 ```
                 
         static void Main(string[] args)

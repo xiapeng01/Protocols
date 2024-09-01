@@ -494,7 +494,6 @@ namespace Protocols.Protocols
         /// <param name="Values"></param>
         /// <returns></returns>
         protected abstract bool WriteRegisters<T>(int StationNumber, byte FunctionCode, int Address, T[] Values);
-
     }
 
     public class RTU : ModbusBase
@@ -510,14 +509,12 @@ namespace Protocols.Protocols
             var crc1 = byteCRC16(data.Take(len - 2).ToArray());
             var crc2 = data.Skip(len - 2).Take(2).ToArray();
             return crc1.SequenceEqual(crc2);
-
         }
 
         protected override bool[] ReadCoils(int StationNumber, byte FunctionCode, int Address, int Count)
         {
             bool[] ret = Array.Empty<bool>();
             var ms = new MemoryStream();
-
 
             ms.WriteByte((byte)StationNumber);//站号            
             ms.WriteByte((byte)FunctionCode);//功能码
@@ -565,7 +562,6 @@ namespace Protocols.Protocols
                     }
                 }
             }
-
             return ret;
         }
 
@@ -573,7 +569,6 @@ namespace Protocols.Protocols
         {
             T[] ret = Array.Empty<T>();
             var ms = new MemoryStream();
-
 
             ms.WriteByte((byte)StationNumber);//站号            
             ms.WriteByte((byte)FunctionCode);//功能码
@@ -629,15 +624,12 @@ namespace Protocols.Protocols
                     }
                 }
             }
-
             return ret;
-
         }
 
         protected override bool WriteCoils(int StationNumber, byte FunctionCode, int Address, bool[] Values)
         {
             var ms = new MemoryStream();
-
 
             ms.WriteByte((byte)StationNumber);//站号            
             ms.WriteByte((byte)FunctionCode);//功能码
@@ -667,7 +659,6 @@ namespace Protocols.Protocols
                 ms.Write(data, 0, data.Length);
             }
 
-
             //CRC
             var crc = byteCRC16(ms.ToArray());
             ms.Write(crc, 0, crc.Length);
@@ -685,7 +676,6 @@ namespace Protocols.Protocols
             {
                 return true;
             }
-
             return false;
         }
 
@@ -789,7 +779,6 @@ namespace Protocols.Protocols
         protected bool CheckLRC8(string frame)
         {
             string pattern = @"[^0-9a-fA-F]";
-
             //string str=Regex.Replace(frame,pattern,"").Trim().ToUpper();//去掉回车和换行,并替换不需要的字符
             string str = frame.Remove(0, 1).Trim();//去掉回车和换行,并替换不需要的字符
             int len = str.Length;

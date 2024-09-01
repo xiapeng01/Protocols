@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Protocols.Protocols.Omron
+namespace Protocols.Omron
 {
     /// <summary>
     /// 使用头编码FA的情况

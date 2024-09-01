@@ -21,6 +21,7 @@ namespace Protocols.Protocols
 
         public Mewtocol(IComm comm) : base(comm)
         {
+
         }
 
         public byte[] ReadData(string regName,int Address, AddressingMode AddressMode, int RegisterLength)
