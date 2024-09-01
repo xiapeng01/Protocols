@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Protocols
 {
     //包含基本方法的基类-本类只能被继承，不能直接创建实例
-    public abstract class ProtocolBase
+    public abstract class ProtocolBase:IDisposable
     {
         public enum FrameFormatEnum { ABCD, BADC, CDAB, DCBA }//4种字节格式
         protected IComm _comm;
@@ -432,6 +432,11 @@ namespace Protocols
         public Task<bool> WriteDataAsync<T>(string regName, int Address, object values)
         {
             return Task.FromResult<bool>(WriteData<T>(regName,Address,values));
+        }
+
+        public void Dispose()
+        {
+            _comm.Dispose();
         }
     }
 }
