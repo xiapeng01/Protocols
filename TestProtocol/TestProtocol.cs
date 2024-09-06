@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 using ConsoleDump;
 using Protocols.Protocols;
 using Protocols.Omron;
-namespace Protocols
+using System.Xml.Linq;
+using Protocols;
+
+namespace TestProtocols
 {
     internal class TestProtocol
     {
@@ -16,17 +19,20 @@ namespace Protocols
         {
             //测试三菱MC-3E
             //TestProtocolBase(new MC_3E("127.0.0.1", 6000), "M", 100, "D", 100);
+            TestProtocolBase(new MC_3Ebase(new CommUDP("127.0.0.1", 6000)), "M", 100, "D", 100);
 
             //测试松下Mewtocol 
             //TestProtocolBase(new Mewtocol(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)),"R",100,"D",100);
 
             //测试欧姆龙FINS
             //TestProtocolBase(new HostLink_Serial(new CommSerialPort("COM1", 9600, 7, Parity.Even, StopBits.One)),"CIO",10000,"D",100);
-            TestProtocolBase(new Fins(new CommTCP("127.0.0.1", 9600)),"CIO",10000,"D",100);
+            //TestProtocolBase(new Fins(new CommTCP("127.0.0.1", 9600)),"CIO",10000,"D",100);
+            //TestProtocolBase(new Fins(new CommUDP("127.0.0.1", 9600)), "CIO", 10000, "D", 100);//帧格式不对
 
             //TestModbus(new ASCII(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
             //TestModbus(new RTU(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
             //TestModbus(new TCP(new CommNet("127.0.0.1", 502)));
+            //TestModbus(new TCP(new CommUDP("127.0.0.1", 502)));
 
         }
 

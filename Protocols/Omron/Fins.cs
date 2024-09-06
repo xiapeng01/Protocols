@@ -66,39 +66,35 @@ namespace Protocols.Omron
             return false;
         }
 
-        void HandShake(Stream s)
-        {
-            if (!IsHandShake && _comm is CommTCP)
-            {
-                var comm = (CommTCP)_comm;
-                byte localIpField = byte.Parse(comm.LocalIp.Remove(0, comm.LocalIp.LastIndexOf('.') + 1));
+        bool HandShake()
+        { 
+            byte localIpField = byte.Parse(_comm.LocalIp.Remove(0, _comm.LocalIp.LastIndexOf('.') + 1));
 
-                MemoryStream ms = new MemoryStream();
-                ms.Write(handShakeHead, 0, handShakeHead.Length);
-                 
-                ms.WriteByte(localIpField);
+            MemoryStream ms = new MemoryStream();
+            ms.Write(handShakeHead, 0, handShakeHead.Length);
 
-                var remoteIpField = byte.Parse(comm.RemoteIp.Remove(0, comm.LocalIp.LastIndexOf('.') + 1));
+            ms.WriteByte(localIpField); 
+            var remoteIpField = byte.Parse(_comm.RemoteIp.Remove(0, _comm.RemoteIp.LastIndexOf('.') + 1));
 
-                handShakeResponse[19] = localIpField;
-                handShakeResponse[23] = remoteIpField;
+            handShakeResponse[19] = localIpField;
+            handShakeResponse[23] = remoteIpField;
 
-                DA1 = remoteIpField;
-                SA1 = localIpField;
+            DA1 = remoteIpField;
+            SA1 = localIpField;
 
-                var sendData = ms.ToArray();
+            var sendData = ms.ToArray();
 
-                var s1=BitConverter.ToString(sendData).Replace("-"," ");
+            var s1 = BitConverter.ToString(sendData).Replace("-", " ");
 
-                var receiveData = comm.Send(s,sendData);
+            var receiveData = _comm.Send(sendData);
 
-                if (receiveData != null
-                    //&& ByteRangeCompare(receiveData, handShakeResponse)
-                    )
-                {
-                    IsHandShake = true;
-                }
+            if (receiveData != null
+                //&& ByteRangeCompare(receiveData, handShakeResponse)
+                )
+            { 
+                return true;
             }
+            return false;
         }
 
         public override bool[] ReadBool(string regName, int Address, int Count)
@@ -177,7 +173,7 @@ namespace Protocols.Omron
 
             //写入Length-2个字节
             var sendData = msHead.ToArray();
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -287,7 +283,7 @@ namespace Protocols.Omron
             //写入Length-2个字节
             var sendData = msHead.ToArray();
             //var s = BitConverter.ToString(sendData).Replace("-", " ");
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -375,7 +371,7 @@ namespace Protocols.Omron
 
             //写入Length-2个字节
             var sendData = msHead.ToArray();
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -486,7 +482,7 @@ namespace Protocols.Omron
             //写入Length-2个字节
             var sendData = msHead.ToArray();
             //var s = BitConverter.ToString(sendData).Replace("-", " ");
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -574,7 +570,7 @@ namespace Protocols.Omron
 
             //写入Length-2个字节
             var sendData = msHead.ToArray();
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -685,7 +681,7 @@ namespace Protocols.Omron
             //写入Length-2个字节
             var sendData = msHead.ToArray();
             //var s = BitConverter.ToString(sendData).Replace("-", " ");
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -774,7 +770,7 @@ namespace Protocols.Omron
             //写入Length-2个字节
             var sendData = msHead.ToArray();
             var t = BitConverter.ToString(sendData).Replace("-", " ");
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -885,7 +881,7 @@ namespace Protocols.Omron
             //写入Length-2个字节
             var sendData = msHead.ToArray();
             //var s = BitConverter.ToString(sendData).Replace("-", " ");
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -973,7 +969,7 @@ namespace Protocols.Omron
 
             //写入Length-2个字节
             var sendData = msHead.ToArray();
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -1084,7 +1080,7 @@ namespace Protocols.Omron
             //写入Length-2个字节
             var sendData = msHead.ToArray();
             //var s = BitConverter.ToString(sendData).Replace("-", " ");
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -1173,7 +1169,7 @@ namespace Protocols.Omron
 
             //写入Length-2个字节
             var sendData = msHead.ToArray();
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -1284,7 +1280,7 @@ namespace Protocols.Omron
             //写入Length-2个字节
             var sendData = msHead.ToArray();
             //var s = BitConverter.ToString(sendData).Replace("-", " ");
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -1372,7 +1368,7 @@ namespace Protocols.Omron
 
             //写入Length-2个字节
             var sendData = msHead.ToArray();
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData, SID))
@@ -1477,7 +1473,7 @@ namespace Protocols.Omron
             //写入Length-2个字节
             var sendData = msHead.ToArray();
             //var s = BitConverter.ToString(sendData).Replace("-", " ");
-            var receiveData = _comm.Send(new Action<Stream>(HandShake), sendData);
+            var receiveData = _comm.Send(new Func<bool>(HandShake), sendData);
 
             //校验接收数据，然后拆出有用数据
             if (CheckFrame(receiveData,SID))

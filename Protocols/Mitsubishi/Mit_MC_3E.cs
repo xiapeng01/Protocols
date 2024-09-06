@@ -609,25 +609,26 @@ namespace Protocols
     //为保持兼容而封装的密封类
     public sealed class MC_3E : MC_3Ebase
     {
-        //以太网方式
+        //以太网-TCP方式
         //最简构造函数
-        public MC_3E(string ip, int port) : base(new CommTCP(ip, port)) {; }
+        public MC_3E(string ip, int port) : base(new CommTCP(ip, port)) { }
 
         //不带信号量初始的构造函数
-        public MC_3E(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) {; }
+        public MC_3E(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) { }
 
         //全参构造函数
-        public MC_3E(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) {; }
+        public MC_3E(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) { }
+
 
         //串口方式
         //最简构造函数
-        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) {; }
+        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) { }
 
         //不带信号量初始的构造函数
-        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) {; }
+        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) { }
 
         //全参构造函数
-        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) {; }
+        public MC_3E(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) { }
 
     }
 }

@@ -15,9 +15,12 @@ namespace Protocols
     //基本的接口
     public interface IComm:IDisposable
     {
+        string LocalIp { get; set; }
+        string RemoteIp { get; set; }
         string Send(string str);//用于收发字符串格式的内容
         byte[] Send(byte[] sendData);//用于收发字节数组格式的内容
-        byte[] Send(Action<Stream> action, byte[] sendData);//用于收发需要额外握手的协议内容
+        //byte[] Send(Action<Stream> action, byte[] sendData);//用于收发需要额外握手的协议内容
+        byte[] Send(Func<bool> handShake, byte[] sendData);//带额外握手的方法
         Task<byte[]> SendAsync(byte[] sendData);//用于异步收发内容-暂未用
         Task<byte[]> SendAsync(byte[] sendData, Func<byte[],bool> VerifyFrame);//用于异步收发内容-暂未用-带校验帧
         void Close();
@@ -27,12 +30,17 @@ namespace Protocols
     public abstract class AComm : IComm, IDisposable
     {
         protected int waitReadDelay = 0;
-        private int bufferSize = 1024;
-        protected static SemaphoreSlim sem = new SemaphoreSlim(1, 1);
-        private static int _minSemaphore = 1;
-        private static int _maxSemaphore = 1;
-        protected abstract Stream GetStream();//普通场景使用的方法
-        protected abstract Stream GetStream(Action<Stream> action);//需要额外握手的场景使用的方法
+        protected int bufferSize = 1024;
+        protected static SemaphoreSlim sem1 = new SemaphoreSlim(1, 1);
+        protected static SemaphoreSlim sem2 = new SemaphoreSlim(1, 1);
+        protected static int _minSemaphore = 1;
+        protected static int _maxSemaphore = 1;
+
+        public string LocalIp { get; set; }
+        public string RemoteIp { get; set; }
+
+        //protected abstract Stream GetStream();//普通场景使用的方法
+        //protected abstract Stream GetStream(Action<Stream> action);//需要额外握手的场景使用的方法
 
         /// <summary>
         /// 经过包装的字符串格式发送接收方法
@@ -44,129 +52,30 @@ namespace Protocols
             return Encoding.UTF8.GetString(Send(Encoding.UTF8.GetBytes(str)));
         }
 
-        /// <summary>
-        /// 通用场景的收发方法，串口方式，TCP方式，UDP方式均适用
-        /// </summary>
-        /// <param name="sendData"></param>
-        /// <returns></returns>
-        public byte[] Send(byte[] sendData)
-        {
-            byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
-            sem.Wait();//限制并发连接数
-            var s = GetStream();
-            s.Write(sendData, 0, sendData.Length);
-            Thread.Sleep(waitReadDelay); 
-            int n = s.Read(ret, 0, ret.Length);
-            sem.Release();
-            Array.Resize(ref ret, n);
-            return ret;
-        }
-
-        /// <summary>
-        /// 指定Stream的版本，用于特定情况下发送握手包的场景
-        /// </summary>
-        /// <param name="s"></param>
-        /// <param name="sendData"></param>
-        /// <returns></returns>
-        public  byte[] Send(Stream s, byte[] sendData)
-        {
-            byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内
-            //sem.Wait();//限制并发连接数                 
-            s.Write(sendData, 0, sendData.Length);
-            Thread.Sleep(waitReadDelay);
-            int n = s.Read(ret, 0, ret.Length);
-            //sem.Release();
-            Array.Resize(ref ret, n);
-            return ret;
-        }
- 
-
-        /// <summary>
-        /// 带一个委托的收发方法，适用于需要额外握手的协议
-        /// </summary>
-        /// <param name="sendData"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public byte[] Send(Action<Stream> action,byte[] sendData)
-        {
-            byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内 
-            sem.Wait();//限制并发连接数
-            var s = GetStream(action);//如果连接不是已有的而是new出来的，就调用action并使用new出来的连接的stream发送握手包
-            //var s1 = BitConverter.ToString(sendData).Replace("-"," ");
-            s.Write(sendData, 0, sendData.Length);//到此处握手应已完成，执行发送
-            Thread.Sleep(waitReadDelay);
-            int n = s.Read(ret, 0, ret.Length);
-            sem.Release();
-            Array.Resize(ref ret, n);
-            return ret;
-        }
+        public abstract byte[] Send(byte[] sendData);//由子类实现的方法         
+        public abstract byte[] Send(Func<bool> handShake, byte[] sendData);//带额外握手包的方法
 
         public Task<Byte[]> SendAsync(byte[] sendData)
         {      
             return Task.Run<Byte[]>(() => {
-                sem.Wait();//限制并发连接数
-                var s = GetStream();
-                s.Write(sendData, 0, sendData.Length);
-                Thread.Sleep(waitReadDelay);  
-                MemoryStream ms = new MemoryStream();
-                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内
-                int count = 0;
-                while (true)
-                {
-                    Array.Clear(ret, 0, ret.Length);
-                    int n = s.Read(ret, 0, ret.Length);
-                    ms.Write(ret, 0, n);
-                    Array.Resize(ref ret, n);
-                    if (n > 5)
-                    {
-                        sem.Release();
-                        return Task.FromResult<Byte[]>(ret);
-                    }
-                    count++;
-                    if (count > 500)
-                    {
-                        sem.Release();
-                        throw new TimeoutException("接收超时！");
-                    }
-                    Thread.Sleep(1);
-                }                
+                return Task.FromResult<byte[]>(Send(sendData));            
             });            
         }
 
         public Task<Byte[]> SendAsync(byte[] sendData, Func<byte[],bool> VerifyFrame)
         {
             return Task.Run<Byte[]>(() => {
-                sem.Wait();//限制并发连接数
-                var s = GetStream();
-                s.Write(sendData, 0, sendData.Length);
-                Thread.Sleep(waitReadDelay);  
-                MemoryStream ms = new MemoryStream();
-                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内
-                int count = 0;
-                while (true)
-                {
-                    Array.Clear(ret, 0, ret.Length);
-                    int n = s.Read(ret, 0, ret.Length);
-                    ms.Write(ret, 0, n);
-                    Array.Resize<byte>(ref ret, n);
-                    if (n > 0 && VerifyFrame(ret))
-                    {
-                        sem.Release();
-                        return Task.FromResult<Byte[]>(ret);
-                    }
-                    count++;
-                    if (count > 500)
-                    {
-                        sem.Release();
-                        throw new TimeoutException("接收超时！"); 
-                    }
-                    Thread.Sleep(1);
-                }
+                var ret=Send(sendData);
+                if(VerifyFrame(ret)) return Task.FromResult<byte[]>(ret);
+                return Task.FromResult<Byte[]>(null);
             });
         }
 
         public abstract void Close();
-        public abstract void Dispose();  
+        public abstract void Dispose();
+
+        
+
     }
 
     //通讯层父类-可选串口或以太网
@@ -177,10 +86,7 @@ namespace Protocols
         private int _timeOut = 1000;
 
         private TcpClient client =null;
-        readonly object lckObj = new Object();
-
-        public string LocalIp = "";
-        public string RemoteIp = "";
+        readonly object lckObj = new Object(); 
 
         //带IP，端口号设置的构造函数
         public CommTCP(string ip, int port)
@@ -203,7 +109,7 @@ namespace Protocols
             _ip = ip;
             _port = port;
             _timeOut = timeOut;
-            sem = new SemaphoreSlim(minSemaphore, maxSemaphore);
+            sem1 = new SemaphoreSlim(minSemaphore, maxSemaphore);
         }
 
         ~CommTCP()
@@ -213,7 +119,7 @@ namespace Protocols
         }
 
         //获取Tcp连接的Stream
-        protected override Stream GetStream()
+        public override byte[] Send(byte[] sendData)
         {
             lock (lckObj)
             {
@@ -221,9 +127,17 @@ namespace Protocols
                 if (client == null) client = new TcpClient();
                 client.ReceiveTimeout = _timeOut;
                 if (!client.Connected) client.Connect(_ip, _port);
-                if (client.Connected) return client.GetStream();
-                 
-                return null;
+                //if (client.Connected) return client.GetStream();
+
+                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
+                sem1.Wait();//限制并发连接数
+                var s = client.GetStream();
+                s.Write(sendData, 0, sendData.Length);
+                Thread.Sleep(waitReadDelay);
+                int n = s.Read(ret, 0, ret.Length);
+                sem1.Release();
+                Array.Resize(ref ret, n);
+                return ret;
             }
         }
 
@@ -232,7 +146,7 @@ namespace Protocols
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        protected override Stream GetStream(Action<Stream> action)
+        public override byte[] Send(Func<bool> handShake, byte[] sendData)
         {
             lock (lckObj)
             {
@@ -245,20 +159,25 @@ namespace Protocols
                     RemoteIp = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
 
                     //应在此时调用子类的方法发送握手包
-                    if (client.Connected) action?.Invoke(client.GetStream());//调用委托发送握手包
+                    for (int i = 0; i < 3; i++) if (handShake?.Invoke() ?? false) break;//握手
  
                 }
                 
                 if (!client.Connected) client.Connect(_ip, _port);
-                if (client.Connected)
-                {
-                    client.ReceiveTimeout = _timeOut;
+                client.ReceiveTimeout = _timeOut;
 
-                    return client.GetStream();
-                }                
-                return null;
+                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
+                sem1.Wait();//限制并发连接数
+                var s = client.GetStream();
+                s.Write(sendData, 0, sendData.Length);
+                Thread.Sleep(waitReadDelay);
+                int n = s.Read(ret, 0, ret.Length);
+                sem1.Release();
+                Array.Resize(ref ret, n);
+                return ret;
             }
         }
+         
 
         public override void Close()
         {
@@ -281,7 +200,7 @@ namespace Protocols
     }
 
     //通讯层父类-可选串口或以太网--未完成
-    [Obsolete]
+    
     public class CommUDP : AComm, IComm
     {
         private string _ip;
@@ -290,9 +209,6 @@ namespace Protocols
 
         private UdpClient client = null;
         readonly object lckObj = new Object();
-
-        public string LocalIp = "";
-        public string RemoteIp = "";
 
         private IPEndPoint localIPE=null;
         private IPEndPoint remoteIPE=null;
@@ -318,7 +234,7 @@ namespace Protocols
             _ip = ip;
             _port = port;
             _timeOut = timeOut;
-            sem = new SemaphoreSlim(minSemaphore, maxSemaphore);
+            sem1 = new SemaphoreSlim(minSemaphore, maxSemaphore);
         }
 
         ~CommUDP()
@@ -327,50 +243,55 @@ namespace Protocols
             client.Dispose();
         }
 
-        //获取Tcp连接的Stream
-        protected override Stream GetStream()
+
+        public override byte[] Send(byte[] sendData)
         {
-            lock (lckObj)
+            sem1.Wait();//限制并发连接数 
+            waitReadDelay = 0;
+            if (localIPE == null) localIPE = new IPEndPoint(IPAddress.Any, 0);
+            if (remoteIPE == null) remoteIPE = new IPEndPoint(IPAddress.Parse(_ip), _port);
+
+            if (client == null)//为空
             {
-                waitReadDelay = 0;
-                if (localIPE == null) localIPE = new IPEndPoint(IPAddress.Any, 0);
-                if (remoteIPE == null) remoteIPE = new IPEndPoint(IPAddress.Parse(_ip), _port);
-
-                if (client == null) client = new UdpClient(localIPE);  
-
-                LocalIp = ((IPEndPoint)client.Client.LocalEndPoint).Address.ToString();
-                RemoteIp = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
-
-                
-                return null;
+                client = new UdpClient(localIPE); 
             }
+             
+            
+            client.Send(sendData, sendData.Length, remoteIPE);
+            Thread.Sleep(waitReadDelay);
+            var ret = client.Receive(ref remoteIPE);
+            sem1.Release(); 
+            return ret;
         }
 
         /// <summary>
-        /// 获取连接的Stream，带委托的版本，适用于需要独立握手的协议
+        /// 带一个回调委托的方法-适用于需要额外握手的协议
         /// </summary>
-        /// <param name="action"></param>
+        /// <param name="sendData"></param>
         /// <returns></returns>
-        protected override Stream GetStream(Action<Stream> action)
+        public override byte[] Send(Func<bool> handShake,byte[] sendData)
         {
-            lock (lckObj)
+            sem2.Wait();//限制并发连接数 
+            waitReadDelay = 0; 
+            if (localIPE == null) localIPE = new IPEndPoint(IPAddress.Any, 0);
+            if (remoteIPE == null) remoteIPE = new IPEndPoint(IPAddress.Parse(_ip), _port);
+             
+            if (client == null)//为空
             {
-                waitReadDelay = 0;
-                if (client == null)
-                {
-                    if (localIPE == null) localIPE = new IPEndPoint(IPAddress.Any, 0);
-                    if (remoteIPE == null) remoteIPE = new IPEndPoint(IPAddress.Parse(_ip), _port);
-                    client = new UdpClient(localIPE); 
-                    LocalIp = ((IPEndPoint)client.Client.LocalEndPoint).Address.ToString();
-                    RemoteIp = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
-
- 
-                }
-
- 
-                return null;
+                client = new UdpClient(localIPE);
+                LocalIp = ((IPEndPoint)client.Client.LocalEndPoint).Address.ToString();
+                RemoteIp = _ip.ToString();
+                for (int i = 0; i < 3; i++)
+                    if (handShake?.Invoke()??false) break ;//执行我手法方法 
             }
+            
+            client.Send(sendData, sendData.Length, remoteIPE);
+            Thread.Sleep(waitReadDelay);
+            var ret = client.Receive(ref remoteIPE);
+            sem2.Release();
+            return ret;
         }
+
 
         public override void Close()
         {
@@ -435,7 +356,7 @@ namespace Protocols
             _dataBits = dataBits;
             _stopBits = stopBits;
             _timeOut = timeOut;
-            sem = new SemaphoreSlim(minSemaphore, maxSemaphore);
+            sem1 = new SemaphoreSlim(minSemaphore, maxSemaphore);
         }
 
         ~CommSerialPort()
@@ -445,7 +366,7 @@ namespace Protocols
         }
 
         //获取Tcp连接的Stream
-        protected override Stream GetStream()
+        public override byte[] Send(byte[] sendData)
         {
             lock (lckObj)
             {
@@ -465,33 +386,21 @@ namespace Protocols
                 if (!sp.IsOpen) sp.Open();
                 sp.WriteTimeout = _timeOut;
                 sp.ReadTimeout = _timeOut;
-                return sp.BaseStream;
+
+                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
+                sem1.Wait();//限制并发连接数
+                var s = sp.BaseStream;
+                s.Write(sendData, 0, sendData.Length);
+                Thread.Sleep(waitReadDelay);
+                int n = s.Read(ret, 0, ret.Length);
+                sem1.Release();
+                Array.Resize(ref ret, n);
+                return ret;
             }
-        }
+        }        
 
-        public override void Close()
-        {
-            if (sp != null && sp.IsOpen) sp?.Close();  
-        }
-
-        public override void Dispose()
-        {
-            try
-            { 
-                sp?.Close();
-                sp?.Dispose();
-                sp = null;
-            }
-            catch (Exception)
-            {
-
-                //throw;
-            }
-        }
-
-        protected override Stream GetStream(Action<Stream> action)
-        {
-            throw new Exception("串口方式不支持此方法！");
+        public override byte[] Send(Func<bool> handShake, byte[] sendData)
+        { 
             lock (lckObj)
             {
                 waitReadDelay = 50;
@@ -506,11 +415,45 @@ namespace Protocols
                     sp.DataBits = _dataBits;
                     sp.Parity = _parity;
                     sp.StopBits = _stopBits;
+
+                    sp.Open();
+
+                    for (int i = 0; i < 3; i++) if (handShake?.Invoke() ?? false) break;//握手
+
                 }
                 if (!sp.IsOpen) sp.Open();
                 sp.WriteTimeout = _timeOut;
-                sp.ReadTimeout = _timeOut; 
-                return sp.BaseStream;
+                sp.ReadTimeout = _timeOut;
+
+                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
+                sem1.Wait();//限制并发连接数
+                var s = sp.BaseStream;
+                s.Write(sendData, 0, sendData.Length);
+                Thread.Sleep(waitReadDelay);
+                int n = s.Read(ret, 0, ret.Length);
+                sem1.Release();
+                Array.Resize(ref ret, n);
+                return ret;
+            }
+        }
+
+        public override void Close()
+        {
+            if (sp != null && sp.IsOpen) sp?.Close();
+        }
+
+        public override void Dispose()
+        {
+            try
+            {
+                sp?.Close();
+                sp?.Dispose();
+                sp = null;
+            }
+            catch (Exception)
+            {
+
+                //throw;
             }
         }
     }
