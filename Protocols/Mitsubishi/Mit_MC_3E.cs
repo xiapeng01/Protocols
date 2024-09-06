@@ -169,7 +169,7 @@ namespace Protocols
             string sendStr = (sendHead + ToBigEndianHexString(strData.Length / 2).Substring(0, 4) + strData);//组合字符串格式发送数据
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
-            var receiveData = _comm.SendAsync(sendData).Result;//接收数据
+            var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
@@ -611,13 +611,13 @@ namespace Protocols
     {
         //以太网方式
         //最简构造函数
-        public MC_3E(string ip, int port) : base(new CommNet(ip, port)) {; }
+        public MC_3E(string ip, int port) : base(new CommTCP(ip, port)) {; }
 
         //不带信号量初始的构造函数
-        public MC_3E(string ip, int port, int timeOut) : base(new CommNet(ip, port, timeOut)) {; }
+        public MC_3E(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) {; }
 
         //全参构造函数
-        public MC_3E(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommNet(ip, port, timeOut, minSemaphore, maxSemaphore)) {; }
+        public MC_3E(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) {; }
 
         //串口方式
         //最简构造函数

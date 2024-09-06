@@ -1,22 +1,22 @@
-# Protocols-工业设备通信协议库
+# Protocols-工业设备通信协议库<br>
 一个为爱发电项目，正在逐步完善中   
-在VS2022+.Net Framework4.8 + HslCommunication 本地测试通过（只测试了M,D寄存器）     
-目前只支持TCP方式和串口方式，欢迎反馈bug   
-感谢以下好友提供的帮助：   
-拓拓(https://github.com/kongdetuo)   
-SlimeNull(https://github.com/SlimeNull)   
-Steve(https://github.com/steveworkshop)   
-林德熙(https://github.com/lindexi)   
-雾雨氏Bot   
-仙女之萌(https://github.com/ilyfairy)   
-Shompinice(https://github.com/MicaApps)   
-      
-20240819：增加ModbusRTU。    
-20240820：增加ModbusASCII，ModbusTCP，增加松下Mewtocol（写多个位时还有bug未修复）！   
-20240828：调整了结构，并增加欧姆龙HostLink_Serial方式（使用头编码FA），其余头编码和Fins方式待后续添加   
-20240901：增加了欧姆龙FinsTCP方式
+在VS2022+.Net Framework4.8 + HslCommunication 本地测试通过（只测试了M,D寄存器）<br> 
+目前只支持TCP方式和串口方式，欢迎反馈bug<br>
+感谢以下好友提供的帮助：<br>
+拓拓(https://github.com/kongdetuo)<br>
+SlimeNull(https://github.com/SlimeNull)<br>
+Steve(https://github.com/steveworkshop)<br>
+林德熙(https://github.com/lindexi)<br>
+雾雨氏Bot<br>
+仙女之萌(https://github.com/ilyfairy)<br>
+Shompinice(https://github.com/MicaApps)<br>
+<br>
+20240819：增加ModbusRTU。<br>
+20240820：增加ModbusASCII，ModbusTCP，增加松下Mewtocol（写多个位时还有bug未修复）！<br>
+20240828：调整了结构，并增加欧姆龙HostLink_Serial方式（使用头编码FA），其余头编码和Fins方式待后续添加<br> 
+20240901：增加了欧姆龙FinsTCP方式<br>
 ```
-        using System;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;

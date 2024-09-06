@@ -68,9 +68,9 @@ namespace Protocols.Omron
 
         void HandShake(Stream s)
         {
-            if (!IsHandShake && _comm is CommNet)
+            if (!IsHandShake && _comm is CommTCP)
             {
-                var comm = (CommNet)_comm;
+                var comm = (CommTCP)_comm;
                 byte localIpField = byte.Parse(comm.LocalIp.Remove(0, comm.LocalIp.LastIndexOf('.') + 1));
 
                 MemoryStream ms = new MemoryStream();

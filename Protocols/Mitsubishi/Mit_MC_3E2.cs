@@ -531,13 +531,13 @@ namespace Protocols
     {
         //以太网方式
         //最简构造函数
-        public MC_3E2(string ip, int port) : base(new CommNet(ip, port)) {; }
+        public MC_3E2(string ip, int port) : base(new CommTCP(ip, port)) {; }
 
         //不带信号量初始的构造函数
-        public MC_3E2(string ip, int port, int timeOut) : base(new CommNet(ip, port, timeOut)) {; }
+        public MC_3E2(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) {; }
 
         //全参构造函数
-        public MC_3E2(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommNet(ip, port, timeOut, minSemaphore, maxSemaphore)) {; }
+        public MC_3E2(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) {; }
 
         //串口方式
         //最简构造函数

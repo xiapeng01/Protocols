@@ -22,7 +22,7 @@ namespace Protocols
 
             //测试欧姆龙FINS
             //TestProtocolBase(new HostLink_Serial(new CommSerialPort("COM1", 9600, 7, Parity.Even, StopBits.One)),"CIO",10000,"D",100);
-            TestProtocolBase(new Fins(new CommNet("127.0.0.1", 9600)),"CIO",10000,"D",100);
+            TestProtocolBase(new Fins(new CommTCP("127.0.0.1", 9600)),"CIO",10000,"D",100);
 
             //TestModbus(new ASCII(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
             //TestModbus(new RTU(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
