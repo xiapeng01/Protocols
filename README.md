@@ -10,11 +10,13 @@ Steve(https://github.com/steveworkshop)<br>
 雾雨氏Bot<br>
 仙女之萌(https://github.com/ilyfairy)<br>
 Shompinice(https://github.com/MicaApps)<br>
+Wang(https://github.com/2236721325)<br>
 <br>
 20240819：增加ModbusRTU。<br>
 20240820：增加ModbusASCII，ModbusTCP，增加松下Mewtocol（写多个位时还有bug未修复）！<br>
 20240828：调整了结构，并增加欧姆龙HostLink_Serial方式（使用头编码FA），其余头编码和Fins方式待后续添加<br> 
 20240901：增加了欧姆龙FinsTCP方式<br>
+20240916：增加了UDP方式<br>
 ```
 using System;
 using System.Collections.Generic;

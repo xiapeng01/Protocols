@@ -539,6 +539,9 @@ namespace Protocols.Protocols
 
             bool status = CheckCrc16(receiveData);
 
+            ms.Dispose();
+            ms = null;
+
             //解析接受数据
             if (receiveData != null //判断是否为空
                 && receiveData.Length >= 6 //判断长度
@@ -601,6 +604,9 @@ namespace Protocols.Protocols
             var receiveData = Comm.Send(sendData);
 
             bool status = CheckCrc16(receiveData);
+
+            ms.Dispose();
+            ms = null;
 
             //解析接受数据
             if (receiveData != null //判断是否为空
@@ -666,6 +672,9 @@ namespace Protocols.Protocols
             //发送数据
             var sendData = ms.ToArray();
             var receiveData = Comm.Send(sendData);
+
+            ms.Dispose();
+            ms = null;
 
             //解析接受数据
             if (receiveData != null //判断是否为空
@@ -754,6 +763,9 @@ namespace Protocols.Protocols
             var sendData = ms.ToArray();
             var receiveData = Comm.Send(sendData);
 
+            ms.Dispose();
+            ms = null;
+
             //解析接受数据
             if (receiveData != null //判断是否为空
                 && receiveData.Length >= 6 //判断长度
@@ -819,6 +831,9 @@ namespace Protocols.Protocols
             var str1 = sendStr.Substring(0,5);
             var str2 = receiveStr.Substring(1,5);
 
+            ms.Dispose();
+            ms = null;
+
             //解析接受数据
             if (receiveStr != null //判断是否为空
                 && receiveStr.Length >= 6 //判断长度
@@ -883,6 +898,9 @@ namespace Protocols.Protocols
             //发送数据
             var sendStr = BitConverter.ToString(ms.ToArray()).Replace("-", "");
             var receiveStr = SendAOP(sendStr);
+
+            ms.Dispose();
+            ms = null;
 
             //解析接受数据
             if (receiveStr != null //判断是否为空
@@ -955,6 +973,9 @@ namespace Protocols.Protocols
             var sendStr = BitConverter.ToString(ms.ToArray()).Replace("-", "");
             var receiveStr = SendAOP(sendStr);
 
+            ms.Dispose();
+            ms = null;
+
             //解析接受数据
             if (receiveStr != null //判断是否为空
                 && receiveStr.Length >= 6 //判断长度
@@ -1043,6 +1064,9 @@ namespace Protocols.Protocols
             //发送数据
             var sendStr = BitConverter.ToString(ms.ToArray()).Replace("-", "");
             var receiveStr = SendAOP(sendStr);
+
+            ms.Dispose();
+            ms = null;
 
             //解析接受数据
             if (receiveStr != null //判断是否为空
@@ -1140,6 +1164,11 @@ namespace Protocols.Protocols
             var sendData = msHead.ToArray();
             var receiveData = Comm.Send(sendData);             
 
+            msHead.Dispose();
+            msHead= null;   
+            msData.Dispose();
+            msData= null;
+
             //解析接受数据
             if (receiveData != null //判断是否为空
                 && receiveData.Length >= 6 //判断长度
@@ -1224,6 +1253,11 @@ namespace Protocols.Protocols
             //发送数据
             var sendData = msHead.ToArray();
             var receiveData = Comm.Send(sendData);
+
+            msHead.Dispose();
+            msHead = null;
+            msData.Dispose();
+            msData = null;
 
             //解析接受数据
             if (receiveData != null //判断是否为空
@@ -1330,6 +1364,11 @@ namespace Protocols.Protocols
             var sendData = msHead.ToArray();
             var receiveData = Comm.Send(sendData);
 
+            msHead.Dispose();
+            msHead = null;
+            msData.Dispose();
+            msData = null;
+
             //解析接受数据
             if (receiveData != null //判断是否为空
                 && receiveData.Length >= 6 //判断长度
@@ -1432,6 +1471,11 @@ namespace Protocols.Protocols
             //发送数据
             var sendData = msHead.ToArray();
             var receiveData = Comm.Send(sendData);
+
+            msHead.Dispose();
+            msHead = null;
+            msData.Dispose();
+            msData = null;
 
             //解析接受数据
             if (receiveData != null //判断是否为空

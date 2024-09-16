@@ -73,7 +73,7 @@ namespace Protocols
             sbHead.Append("00");//网络号
             sbHead.Append("FF");//可编程控制器网络号
             sbHead.Append("FF03");//请求目标模块I/O编号
-            sbHead.Append("00");//请求目标模块站号
+            sbHead.Append("00");//请求目标模块站号 
             return sbHead.ToString();
         }
 
@@ -109,7 +109,7 @@ namespace Protocols
 
             var sendData = HexStringToByteArray(sendStr);//发送数据
             var receiveData = _comm.Send(sendData);//接收数据
-
+            
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常

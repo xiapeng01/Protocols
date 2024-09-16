@@ -84,7 +84,7 @@ namespace Protocols
             sendData.AddRange(sbData);
 
             var receiveData = _comm.Send(sendData.ToArray());//接收数据
-
+            
             //校验接收到的数据
             if (receiveData != null && //接收内容不为空
                 receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
