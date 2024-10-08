@@ -16,7 +16,10 @@ namespace Protocols.Omron
 
         static byte[] handShakeResponse = Array.Empty<byte>();
 
-        int sid=0;
+        static byte[] frameHead = new byte[] { 0x46, 0x49, 0x4e, 0x53 };
+        static byte[] frameConditon = new byte[] { 0x00, 0x00, 0x00, 0x00 };
+
+        int sid = 0;
 
         byte SA1 = 0x01;//源IP最后一个字段
         byte DA1 = 0x01;//目标IP最后一个字段
@@ -47,33 +50,42 @@ namespace Protocols.Omron
             }
         }
 
+        /// <summary>
+        /// 检查包序号
+        /// </summary>
+        /// <returns></returns>
         byte GetSID()
         {
             return (byte)Interlocked.Increment(ref sid);
         }
 
-        bool CheckFrame(byte[] data,byte SID)
+        /// <summary>
+        /// 检查帧格式
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="SID"></param>
+        /// <returns></returns>
+        bool CheckFrame(ref byte[] frame, byte SID)
         {
-            if (data != null
-                && data.Length >16
-                && data[25]==SID
-                && ByteRangeCompare(data.Take(4).ToArray(), new byte[] { 0x46, 0x49, 0x4e, 0x53 })
-                && ByteRangeCompare(data.Skip(12).Take(4).ToArray(), new byte[] { 0x00, 0x00, 0x00, 0x00 })
-                )
+            if (frame == null || frame.Length < 14) return false;
+            if (CheckFrame(ref frame, frameHead))
             {
-                return true;
+                if (frame[25] == SID && ByteRangeCompare(frame.Skip(12).Take(4).ToArray(), frameConditon))
+                {
+                    return true;
+                }//从一开始匹配到
             }
             return false;
         }
 
         bool HandShake()
-        { 
+        {
             byte localIpField = byte.Parse(_comm.LocalIp.Remove(0, _comm.LocalIp.LastIndexOf('.') + 1));
 
             MemoryStream ms = new MemoryStream();
             ms.Write(handShakeHead, 0, handShakeHead.Length);
 
-            ms.WriteByte(localIpField); 
+            ms.WriteByte(localIpField);
             var remoteIpField = byte.Parse(_comm.RemoteIp.Remove(0, _comm.RemoteIp.LastIndexOf('.') + 1));
 
             handShakeResponse[19] = localIpField;
@@ -93,7 +105,7 @@ namespace Protocols.Omron
             if (receiveData != null
                 //&& ByteRangeCompare(receiveData, handShakeResponse)
                 )
-            { 
+            {
                 return true;
             }
             return false;
@@ -149,7 +161,7 @@ namespace Protocols.Omron
             msHead.WriteByte(0x00);
 
             //写入SID
-            var SID=GetSID();
+            var SID = GetSID();
             msHead.WriteByte(SID);
 
             //写入MRC
@@ -183,7 +195,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -298,7 +310,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -391,7 +403,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -481,9 +493,9 @@ namespace Protocols.Omron
             //写入值
             foreach (var value in Values)
             {
-                var tmp= BitConverter.GetBytes((Int16)value);
+                var tmp = BitConverter.GetBytes((Int16)value);
                 Array.Reverse(tmp);
-                msData.Write(tmp,0,tmp.Length);
+                msData.Write(tmp, 0, tmp.Length);
             }
 
             var data = msData.ToArray();
@@ -507,7 +519,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -600,7 +612,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -716,7 +728,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -795,7 +807,7 @@ namespace Protocols.Omron
             msHead.WriteByte(addr2);
 
             //写入读取长度
-            var len = BitConverter.GetBytes((Int16)(Count*2));
+            var len = BitConverter.GetBytes((Int16)(Count * 2));
             Array.Reverse(len);
             msHead.Write(len, 0, len.Length);
 
@@ -810,7 +822,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -926,7 +938,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -1019,7 +1031,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -1135,7 +1147,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -1229,7 +1241,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -1345,7 +1357,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -1438,11 +1450,11 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData, SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 //拆数据-不进行高低字节交换
                 var dataStartPos = 30;
-                ret =Encoding.UTF8.GetString(receiveData.Skip(dataStartPos).Take(Count).ToArray());
+                ret = Encoding.UTF8.GetString(receiveData.Skip(dataStartPos).Take(Count).ToArray());
             }
             return ret;
         }
@@ -1524,8 +1536,8 @@ namespace Protocols.Omron
             //写入值--不进行高低字节交换试试
             var str = Value;
             if (str.Length % 2 != 0) str += "\0";
-            var buffer=Encoding.UTF8.GetBytes(str);
-            msData.Write(buffer, 0, buffer.Length); 
+            var buffer = Encoding.UTF8.GetBytes(str);
+            msData.Write(buffer, 0, buffer.Length);
 
             var data = msData.ToArray();
 
@@ -1548,7 +1560,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(receiveData,SID))
+            if (CheckFrame(ref receiveData, SID))
             {
                 return true;
             }

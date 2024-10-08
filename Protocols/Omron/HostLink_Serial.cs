@@ -12,6 +12,8 @@ namespace Protocols.Omron
     /// </summary>
     public class HostLink_Serial : ProtocolBase
     {
+        string frameHead = "@00FA";
+
         /// <summary>
         /// 串口时固定使用7位偶校验1位停止位，默认9600
         /// </summary>
@@ -55,11 +57,20 @@ namespace Protocols.Omron
             return (byte)ret;
         }
 
-        bool CheckFCS(string str)
+        bool CheckFCS(string frame)
         { 
-            string FCS1 = str.Substring(str.Length-4,2);
-            string FCS2 = FCS(str.Substring(0,str.Length-4)).ToString("X2");
+            string FCS1 = frame.Substring(frame.Length-4,2);
+            string FCS2 = FCS(frame.Substring(0,frame.Length-4)).ToString("X2");
             return FCS1.Equals(FCS2);
+        }
+
+        bool CheckFrame(ref string frame)
+        {
+            if(CheckFrame(ref frame,frameHead))
+            {
+                return CheckFCS(frame);
+            }
+            return false;
         }
 
         //发送：@00FA000000000010130000000000571*\CR
@@ -96,9 +107,7 @@ namespace Protocols.Omron
 
             string sendStr=strHead + strData;
             var receiveStr=_comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0,5).Equals(sendStr.Substring(0,5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 //解析接收到的数据
                 ret = new bool[Count];
@@ -141,9 +150,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 return true;
             }
@@ -175,9 +182,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 //解析接收到的数据
                 int DataStartPos = 23;
@@ -223,9 +228,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             { 
                 return true;
             }
@@ -257,9 +260,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 //解析接收到的数据
                 int DataStartPos = 23;
@@ -305,9 +306,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 return true;
             }
@@ -339,9 +338,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 //解析接收到的数据
                 int DataStartPos = 23;
@@ -387,9 +384,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 return true;
             }
@@ -422,9 +417,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 //解析接收到的数据
                 int DataStartPos = 23;
@@ -470,9 +463,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 return true;
             }
@@ -504,9 +495,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 //解析接收到的数据
                 int DataStartPos = 23;
@@ -552,9 +541,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 return true;
             }
@@ -586,9 +573,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 //解析接收到的数据
                 int DataStartPos = 23;
@@ -633,9 +618,7 @@ namespace Protocols.Omron
 
             string sendStr = strHead + strData;
             var receiveStr = _comm.Send(sendStr);
-            if (receiveStr != null //接收内容不为空
-                && receiveStr.Substring(0, 5).Equals(sendStr.Substring(0, 5)) //帧头校验通过
-                && CheckFCS(receiveStr)) //校验码校验通过
+            if (CheckFrame(ref receiveStr))//帧校验通过
             {
                 return true;
             }

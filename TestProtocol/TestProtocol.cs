@@ -22,16 +22,17 @@ namespace TestProtocols
             //TestProtocolBase(new MC_3Ebase(new CommUDP("127.0.0.1", 6000)), "M", 100, "D", 100);
 
             //测试松下Mewtocol 
-            //TestProtocolBase(new Mewtocol(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)),"R",100,"D",100);
+            //TestProtocolBase(new Mewtocol(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)),"R",0x100,"D",100);
 
             //测试欧姆龙FINS
+            //使用HostLinkServer
             //TestProtocolBase(new HostLink_Serial(new CommSerialPort("COM1", 9600, 7, Parity.Even, StopBits.One)),"CIO",10000,"D",100);
             //TestProtocolBase(new Fins(new CommTCP("127.0.0.1", 9600)),"CIO",10000,"D",100);
             //TestProtocolBase(new Fins(new CommUDP("127.0.0.1", 9600)), "CIO", 10000, "D", 100);//帧格式不对
 
             //TestModbus(new ASCII(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
             //TestModbus(new RTU(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
-            TestModbus(new TCP(new CommTCP("127.0.0.1", 502)));
+            //TestModbus(new TCP(new CommTCP("127.0.0.1", 502)));
             //TestModbus(new TCP(new CommUDP("127.0.0.1", 502)));
 
         }
@@ -64,7 +65,7 @@ namespace TestProtocols
 
 
             "读写多个寄存器".Dump("读写多个寄存器"); 
-            m.WriteMultipleCoils(1, 100, new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true }).Dump(); 
+            m.WriteMultipleCoils(1, 100, new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true, false }).Dump(); 
             m.ReadCoils(1, 100, 20).Dump();
              
             m.WriteMultipleRegisters<Int16>(1, (Int16)100, new Int16[] { 1234, 1234, 1234, 1234, 1234 }).Dump(); 
@@ -126,7 +127,7 @@ namespace TestProtocols
 
 
                 Console.WriteLine("读写多个元件"); 
-                m.WriteBool(bitRegName, bitAddress, new bool[] { true, false, true, false, true }).Dump("写5个布尔值：");
+                m.WriteBool(bitRegName, bitAddress, new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true, false }).Dump("写5个布尔值：");
                 m.ReadBool(bitRegName, bitAddress, 5).Dump("读5个布尔值：");
                  
                 m.WriteInt16(dataRegName, dataAddress, new Int16[] { 1, 2, 3, 4, 5 }).Dump("写5个有符号字：");
@@ -175,7 +176,7 @@ namespace TestProtocols
 
                 //读写多个元件
                 Console.WriteLine("读写多个元件"); 
-                m.WriteData<bool[]>(bitRegName, bitAddress, (object)new bool[] { true, false, true, false, true }).Dump("泛型写5布尔值");
+                m.WriteData<bool[]>(bitRegName, bitAddress, (object)new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true, false }).Dump("泛型写5布尔值");
                 m.ReadData<bool[]>(bitRegName, bitAddress, 5).Dump("泛型读5布尔值");
                  
                 m.WriteData<Int16[]>(dataRegName, dataAddress, (object)new Int16[] { 1, 2, 3, 4, 5 }).Dump("泛型写5INT16");
@@ -221,7 +222,7 @@ namespace TestProtocols
 
                  
                 Console.WriteLine("读写多个元件"); 
-                m.WriteDataAsync<bool[]>(bitRegName, bitAddress, (object)new bool[] { true, false, true, false, true }).Result.Dump("泛型写5布尔值");
+                m.WriteDataAsync<bool[]>(bitRegName, bitAddress, (object)new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true, false }).Result.Dump("泛型写5布尔值");
                 m.ReadDataAsync<bool[]>(bitRegName, bitAddress, 5).Result.Dump("泛型读5布尔值");
                  
                 m.WriteDataAsync<Int16[]>(dataRegName, dataAddress, (object)new Int16[] { 1, 2, 3, 4, 5 }).Result.Dump("泛型写5INT16");

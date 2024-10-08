@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks; 
 using System.Data;
 using System.Net;
+using System.Collections;
 
 namespace Protocols
 {
@@ -42,6 +43,11 @@ namespace Protocols
         //protected abstract Stream GetStream();//普通场景使用的方法
         //protected abstract Stream GetStream(Action<Stream> action);//需要额外握手的场景使用的方法
 
+        ~AComm() 
+        {
+            Dispose();
+        }
+
         /// <summary>
         /// 经过包装的字符串格式发送接收方法
         /// </summary>
@@ -49,7 +55,8 @@ namespace Protocols
         /// <returns></returns>
         public string Send(string str)
         {
-            return Encoding.UTF8.GetString(Send(Encoding.UTF8.GetBytes(str)));
+            string ret = Encoding.UTF8.GetString(Send(Encoding.UTF8.GetBytes(str)));
+            return ret;
         }
 
         public abstract byte[] Send(byte[] sendData);//由子类实现的方法         
@@ -72,10 +79,7 @@ namespace Protocols
         }
 
         public abstract void Close();
-        public abstract void Dispose();
-
-        
-
+        public abstract void Dispose();       
     }
 
     //通讯层父类-可选串口或以太网
@@ -114,20 +118,22 @@ namespace Protocols
 
         ~CommTCP()
         {
-            client.Close();
-            client.Dispose();
+            Dispose();
         }
 
         //获取Tcp连接的Stream
         public override byte[] Send(byte[] sendData)
         {
-            lock (lckObj)
+            //lock (lckObj)
             {
                 waitReadDelay = 0;
-                if (client == null) client = new TcpClient();
-                client.ReceiveTimeout = _timeOut;
-                if (!client.Connected) client.Connect(_ip, _port);
+                if (client == null)
+                {
+                    client = new TcpClient();
+                    client.Connect(_ip, _port);
+                } 
                 //if (client.Connected) return client.GetStream();
+                client.ReceiveTimeout = _timeOut;
 
                 byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
                 sem1.Wait();//限制并发连接数
@@ -146,10 +152,11 @@ namespace Protocols
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public override byte[] Send(Func<bool> handShake, byte[] sendData)
+        public override byte[] Send(Func<bool> handShakeDelegate, byte[] sendData)
         {
-            lock (lckObj)
+            //lock (lckObj)
             {
+                sem2.Wait();//限制并发连接数
                 waitReadDelay = 0;
                 if (client == null)
                 {
@@ -159,7 +166,7 @@ namespace Protocols
                     RemoteIp = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
 
                     //应在此时调用子类的方法发送握手包
-                    for (int i = 0; i < 3; i++) if (handShake?.Invoke() ?? false) break;//握手
+                    for (int i = 0; i < 3; i++) if (handShakeDelegate?.Invoke() ?? false) break;//握手
  
                 }
                 
@@ -167,12 +174,12 @@ namespace Protocols
                 client.ReceiveTimeout = _timeOut;
 
                 byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
-                sem1.Wait();//限制并发连接数
+                
                 var s = client.GetStream();
                 s.Write(sendData, 0, sendData.Length);
                 Thread.Sleep(waitReadDelay);
                 int n = s.Read(ret, 0, ret.Length);
-                sem1.Release();
+                sem2.Release();
                 Array.Resize(ref ret, n);
                 return ret;
             }
@@ -181,21 +188,22 @@ namespace Protocols
 
         public override void Close()
         {
-            if (client != null && client.Connected) client?.Close(); 
+            try
+            {
+                client?.Close();
+            }
+            catch{}
         }
 
         public override void Dispose()
-        {            
+        {
             try
-            {                
+            {
                 client?.Close();
                 client?.Dispose();
                 client = null;
             }
-            catch (Exception)
-            {
-                //throw;
-            }
+            catch { }
         }
     }
 
@@ -239,8 +247,7 @@ namespace Protocols
 
         ~CommUDP()
         {
-            client.Close();
-            client.Dispose();
+            Dispose();
         }
 
 
@@ -295,7 +302,11 @@ namespace Protocols
 
         public override void Close()
         {
-            ;
+            try
+            {
+                client?.Close();
+            }
+            catch { }
         }
 
         public override void Dispose()
@@ -306,10 +317,7 @@ namespace Protocols
                 client?.Dispose();
                 client = null;
             }
-            catch (Exception)
-            {
-                //throw;
-            }
+            catch { }
         }
     }
 
@@ -361,8 +369,7 @@ namespace Protocols
 
         ~CommSerialPort()
         {
-            sp?.Close();
-            sp?.Dispose();
+            Dispose();
         }
 
         //获取Tcp连接的Stream
@@ -376,14 +383,14 @@ namespace Protocols
                 if (!ports.Any(p => p.Contains(_portName))) throw new InvalidDataException($"串口:{_portName}不存在");
                 if (sp == null)
                 {
-                    sp = new SerialPort();
+                    sp = new SerialPort(); 
                     sp.PortName = _portName;
                     sp.BaudRate = _baudRate;
                     sp.DataBits = _dataBits;
                     sp.Parity = _parity;
                     sp.StopBits = _stopBits;
+                    sp.Open();
                 }
-                if (!sp.IsOpen) sp.Open();
                 sp.WriteTimeout = _timeOut;
                 sp.ReadTimeout = _timeOut;
 
@@ -409,7 +416,7 @@ namespace Protocols
                 if (!ports.Any(p => p.Contains(_portName))) throw new InvalidDataException($"串口:{_portName}不存在");
                 if (sp == null)
                 {
-                    sp = new SerialPort();
+                    sp = new SerialPort(); 
                     sp.PortName = _portName;
                     sp.BaudRate = _baudRate;
                     sp.DataBits = _dataBits;
@@ -419,9 +426,7 @@ namespace Protocols
                     sp.Open();
 
                     for (int i = 0; i < 3; i++) if (handShake?.Invoke() ?? false) break;//握手
-
                 }
-                if (!sp.IsOpen) sp.Open();
                 sp.WriteTimeout = _timeOut;
                 sp.ReadTimeout = _timeOut;
 
@@ -435,11 +440,15 @@ namespace Protocols
                 Array.Resize(ref ret, n);
                 return ret;
             }
-        }
+        } 
 
         public override void Close()
         {
-            if (sp != null && sp.IsOpen) sp?.Close();
+            try
+            {
+                sp?.Close();
+            }
+            catch { }
         }
 
         public override void Dispose()
@@ -450,11 +459,7 @@ namespace Protocols
                 sp?.Dispose();
                 sp = null;
             }
-            catch (Exception)
-            {
-
-                //throw;
-            }
+            catch { }
         }
     }
 }

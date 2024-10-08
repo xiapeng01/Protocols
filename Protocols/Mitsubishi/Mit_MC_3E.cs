@@ -17,11 +17,25 @@ namespace Protocols
         const string sendHead = "500000FFFF0300";
         const string receiveHead = "D00000FFFF0300";
 
+        byte[] sendFrameHead;
+        byte[] receiveFrameHead;
+
         //带IP，端口号设置的构造函数
         public MC_3Ebase(IComm comm) : base(comm)//显式调用基类的构造函数
         {
-
+            sendFrameHead = HexStringToByteArray(sendHead);
+            receiveFrameHead = HexStringToByteArray(receiveHead);
         }
+
+        /// <summary>
+        /// 为方便使用重载一个减少参数传递
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <returns></returns>
+       protected bool CheckFrame(ref byte[] frame)
+       {
+            return CheckFrame(ref frame, receiveFrameHead);
+       }
 
         //获取寄存器对应的符号编号
         string GetRegCode(string regName)
@@ -75,7 +89,8 @@ namespace Protocols
             sbHead.Append("FF03");//请求目标模块I/O编号
             sbHead.Append("00");//请求目标模块站号 
             return sbHead.ToString();
-        }
+        }        
+
 
         //读Bool型变量时，子指令为0000时的报文格式（读5个数据，返回内容为0x15：true,false,true,false,true）-此时数量取（(Count % 0x10)>0?Count/0x10+1:Count/0x10）
         //发送: 50 00 00 FF FF 03 00 0C 00 10 00 01 04 00 00 64 00 00 90 01 00
@@ -111,9 +126,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
             
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new bool[Count];//初始化返回值数组
                 string strContent = "";//要将内容填充进去
@@ -172,9 +185,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -236,9 +247,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new short[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -272,9 +281,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -301,9 +308,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new UInt16[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -337,9 +342,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -367,9 +370,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new Int32[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -403,9 +404,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -432,9 +431,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new UInt32[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -468,9 +465,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -497,9 +492,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new Single[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -533,9 +526,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -563,9 +554,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 byte[] dat = new byte[Count];
                 Array.Copy(receiveData, receiveDataHeadLength, dat, 0, Count);
@@ -596,9 +585,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (receiveData != null && //接收内容不为空
-                receiveData.Length >= receiveDataHeadLength &&//接收内容长度正常
-                BitConverter.ToString(receiveData).Replace("-", "").StartsWith(receiveHead))//接收内容符合格式要求
+            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }

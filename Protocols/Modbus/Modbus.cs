@@ -51,6 +51,39 @@ namespace Protocols.Protocols
             return BitConverter.GetBytes(crc);
         }
 
+        /// <summary>
+        /// 校验帧，只要返回true，就表示从开始处能匹配到帧格式
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="frameHead"></param>
+        /// <returns></returns>
+        protected bool CheckFrame(ref byte[] frame, byte[] frameHead)
+        {
+            if (frame == null || frame.Length < 1) return false;//特定情况，提前返回
+            if (ByteRangeCompare(frame.Take(frameHead.Length).ToArray(), frameHead)) return true;//从开始就匹配到帧头
+            for (int i = 0; i < frame.Length - frameHead.Length; i++)
+            {
+                if (ByteRangeCompare(frame.Skip(i).Take(frameHead.Length).ToArray(), frameHead))
+                {
+                    frame = frame.Skip(i).Take(frame.Length - i).ToArray();//从找到的位置裁切数组
+                    return true;
+                }
+            }
+            return false;//一个循环下来未找到符合条件的内容，返回false
+        }
+
+        protected bool CheckFrame(ref string frame, string frameHead)
+        {
+            if (string.IsNullOrWhiteSpace(frame) || frame.Length < 1) return false;
+            if (frame.Contains(frameHead))
+            {
+                var startIndex = frame.IndexOf(frameHead);
+                if (startIndex == 0) return true;
+                frame = frame.Substring(startIndex);
+            }
+            return false;
+        }
+
         protected byte[] BoolArrayToByteArray(bool[] boolArray)
         {
             int bytesLength = (boolArray.Length + 7) / 8;    //计算字节长度喵
@@ -65,6 +98,11 @@ namespace Protocols.Protocols
                 }
             }
             return byteArray;
+        }
+
+        protected byte[] BoolStringToByteArray(string BoolString)
+        {
+            return BoolArrayToByteArray(BoolString.Select(a => a == '1').ToArray());                    
         }
 
         protected byte LRC8(byte[] dat)
@@ -98,6 +136,18 @@ namespace Protocols.Protocols
             .Select(y => Convert.ToByte(t.Substring(y, 2), 16))
             .ToArray();
             return ret;
+        }
+
+        //字节数组比较
+        protected bool ByteRangeCompare(byte[] sources, byte[] pattern)
+        {
+            if (sources == null || pattern == null) return false;
+            if (sources.Length != pattern.Length) return false;
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                if (sources[i] != pattern[i]) return false;
+            }
+            return true;
         }
 
         //各基本类型的大小端转换，大转小，小转大方法相同

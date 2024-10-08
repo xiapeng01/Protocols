@@ -17,6 +17,7 @@ Wang(https://github.com/2236721325)<br>
 20240828：调整了结构，并增加欧姆龙HostLink_Serial方式（使用头编码FA），其余头编码和Fins方式待后续添加<br> 
 20240901：增加了欧姆龙FinsTCP方式<br>
 20240916：增加了UDP方式<br>
+20241008：增加了帧头校验，解决沾包的问题，性能会有一定程度下降<br>
 ```
 using System;
 using System.Collections.Generic;

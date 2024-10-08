@@ -24,10 +24,22 @@ namespace Protocols.Protocols
 
         }
 
+        bool CheckFrame(ref string data, string startSymbol, string endSymbol, int minLength = 0)
+        {
+            if (string.IsNullOrWhiteSpace(data) || data.Length < minLength) return false;//长度小于预期，返回false
+            if (!data.Contains(startSymbol)) return false;//如果不存在起始符就返回false        
+            int startIndex = data.IndexOf(startSymbol);
+            data = data.Substring(startIndex, data.Length - startIndex);
+            if (!data.Contains(endSymbol)) return false;//如果不存在结束符就返回false
+            int endIndex = data.IndexOf(endSymbol);
+            data = data.Substring(0, endIndex + 1);//保留结束符
+            return true;
+        }
+
         public byte[] ReadData(string regName,int Address, AddressingMode AddressMode, int RegisterLength)
         {
             byte[] ret = null;
-            if (regName.Contains(".")) return null;//暂不支持带点位寻址的方式
+            if (regName.Contains(".")) throw new InvalidOperationException("暂不支持此寻址方式");//暂不支持带点位寻址的方式
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             ///用正则表达式拆分地址内容
 
@@ -51,7 +63,7 @@ namespace Protocols.Protocols
 
         public bool WriteData(string regName,int Address, AddressingMode AddressMode, byte[] Data)
         {
-            if (regName.Contains(".")) return false;//暂不支持带点位寻址的方式
+            if (regName.Contains(".")) throw new InvalidOperationException("暂不支持此寻址方式");//暂不支持带点位寻址的方式
             /////////////////////////////////////////////////////////////////////////////////////////////////////
             ///用正则表达式拆分地址内容                         
 
@@ -104,13 +116,21 @@ namespace Protocols.Protocols
                 case "D":
                 case "DT":
                 case "DDT":
-                    Ret = WriteWord(Station, RegisterName, Address, Count / 2, Data);//字地址按十进制解析
+                    Ret = WriteWord(Station, "D", Address, Count / 2, Data);//字地址按十进制解析
                     break;
                 default: throw new InvalidOperationException("不支持的寄存器类型！");
             }
             return Ret;
         }
 
+        /// <summary>
+        /// 按字寻址读取
+        /// </summary>
+        /// <param name="Station"></param>
+        /// <param name="strRegName"></param>
+        /// <param name="Address"></param>
+        /// <param name="addressCount"></param>
+        /// <returns></returns>
         private string ReadWord(int Station, string strRegName, int Address, int addressCount)
         {
             lock (Lock_Serial)
@@ -121,12 +141,13 @@ namespace Protocols.Protocols
 
                 // 组帧-字地址时地址宽度为5字符
                 strSend = @"%" + Station.ToString("X2") + "#RD" + strRegName.ToUpper() + Address.ToString("D5") + (Address + addressCount - 1).ToString("D5");
+                if (addressCount >= 28) strSend=strSend.Replace("%","<");
                 strSend += BCC(strSend) + "\r";// 字符添加校验码和回车结束符
 
                 //发送接收//因Mewtocol是字符串协议，在此处转换 
                 strReceive = _comm.Send(strSend);//已改写
 
-                if (strReceive.Length < 4 || strReceive == string.Empty || strReceive[3] != '$') return null;//数据错误
+                if (!CheckFrame(ref strReceive, strSend.Substring(0, 1), "\r", 4) || strReceive[3] != '$') return null;//解帧出错在此处    
 
                 // 解帧
                 ret = strReceive.Substring(6, addressCount * 4);
@@ -134,7 +155,14 @@ namespace Protocols.Protocols
             }
         }
 
-
+        /// <summary>
+        /// 按位寻址读取
+        /// </summary>
+        /// <param name="Station"></param>
+        /// <param name="strRegName"></param>
+        /// <param name="Address"></param>
+        /// <param name="AddressCount"></param>
+        /// <returns></returns>
         private string ReadBit(int Station, string strRegName, int Address, int AddressCount)
         {
             lock (Lock_Serial)
@@ -157,7 +185,7 @@ namespace Protocols.Protocols
                     strReceive = _comm.Send(strSend);//已改写
 
                     //解帧
-                    if (strReceive.Length < 4 || strReceive == string.Empty || strReceive[3] != '$') return null;//解帧出错在此处                    
+                    if (!CheckFrame(ref strReceive,strSend.Substring(0,1),"\r",4) || strReceive[3] != '$') return null;//解帧出错在此处                    
                     ret = strReceive.Substring(6, 1).Insert(0, "0");// 解析串口接收的数据-单位结构解析方法
 
                     return ret;
@@ -177,7 +205,7 @@ namespace Protocols.Protocols
                     strReceive = _comm.Send(strSend);//已改写
 
                     //解帧
-                    if (strReceive.Length < 4 || strReceive == string.Empty || strReceive[3] != '$') return null;//解帧出错在此处
+                    if (!CheckFrame(ref strReceive, strSend.Substring(0, 1), "\r", 4) || strReceive[3] != '$') return null;//解帧出错在此处       
 
                     //为保持对终端的兼容性
                     var str = strReceive.Substring(6, (endAddress - startAddress + 1) * 4);
@@ -189,6 +217,15 @@ namespace Protocols.Protocols
             }
         }
 
+        /// <summary>
+        /// 按字寻址写
+        /// </summary>
+        /// <param name="Station"></param>
+        /// <param name="memory"></param>
+        /// <param name="address"></param>
+        /// <param name="addressCount"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         private bool WriteWord(int Station, string memory, int address, int addressCount, string data)
         {
             lock (Lock_Serial)
@@ -198,17 +235,27 @@ namespace Protocols.Protocols
 
                 // 组帧-字地址时地址宽度为5字符
                 strSend = @"%" + Station.ToString("X2") + "#WD" + memory.ToUpper() + address.ToString("d5") + (address + addressCount - 1).ToString("d5") + data;
+                if (addressCount >= 24) strSend=strSend.Replace("%", "<");
                 strSend += BCC(strSend) + "\r";// 字符添加校验码和回车结束符
 
                 //发送接收//因Mewtocol是字符串协议，在此处转换
                 strReceive = _comm.Send(strSend);//已改写
 
                 //解帧
-                if (strReceive == string.Empty || strReceive[3] != '$') return false;
+                if (!CheckFrame(ref strReceive, strSend.Substring(0, 1), "\r", 4) || strReceive[3] != '$') return false;//解帧出错在此处    
                 return true;
             }
         }
 
+        /// <summary>
+        /// 按位寻址写
+        /// </summary>
+        /// <param name="Station"></param>
+        /// <param name="memory"></param>
+        /// <param name="address"></param>
+        /// <param name="addressCount"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         private bool WriteBit(int Station, string memory, int address, int addressCount, string data)
         {
             lock (Lock_Serial)
@@ -218,8 +265,8 @@ namespace Protocols.Protocols
 
                 if (addressCount == 1)
                 {
-                    string strStartAddress = address.ToString("d4");
-                    string strEndAddress = (address + addressCount - 1).ToString("d4");
+                    string strStartAddress = address.ToString("X4");
+                    //string strEndAddress = (address + addressCount - 1).ToString("d4");
 
                     //组帧
                     strSend = @"%" + Station.ToString("X2") + "#WCS" + memory.ToUpper() + strStartAddress + data;
@@ -234,6 +281,8 @@ namespace Protocols.Protocols
                 }
                 else
                 {
+                    //RCC/WCC方式只能按字（16位）读写
+                    //RCP/WCP方式要依次指定寄存器类型，地址，值，单次最多读写8个
                     if (address % 0x10 != 0) return false;//起始地址不为0x10的整数倍
                     if (addressCount % 0x10 != 0) return false;//地址数量不为0x10的整数倍
 
@@ -241,14 +290,15 @@ namespace Protocols.Protocols
                     int endAddress = (address + addressCount - 1) / 0x10;
 
                     //组帧
-                    strSend = @"%" + Station.ToString("X2") + "#WCC" + memory.ToUpper() + startAddress.ToString("X4") + endAddress.ToString("X4") + string.Join(string.Empty, Enumerable.Range(0, data.Length / 8).Select(e => Convert.ToByte(string.Join("", data.Substring(e * 8, 8)), 2).ToString("X2").Reverse().ToArray()));
+                    string ValueString = BitConverter.ToString(BoolStringToByteArray(data)).Replace("-","");
+                    strSend = @"%" + Station.ToString("X2") + "#WCC" + memory.ToUpper() + startAddress.ToString("X4") + endAddress.ToString("X4") + ValueString;
                     strSend += BCC(strSend) + "\r";// 字符添加校验码和回车结束符
 
                     //发送接收//因Mewtocol是字符串协议，在此处转换
                     strReceive = _comm.Send(strSend);//已改写
 
                     //解帧
-                    if (strReceive == string.Empty || strReceive[3] != '$') return false;
+                    if (!CheckFrame(ref strReceive, strSend.Substring(0, 1), "\r", 4) || strReceive[3] != '$') return false;//解帧出错在此处    
 
                     return true;
                 }
@@ -263,7 +313,13 @@ namespace Protocols.Protocols
         string BCC(string str)
         {
             byte res = 0;
-            return str.ToArray().Select(x => res ^= (byte)x).Last().ToString("X2");
+            //return str.ToArray().Select(x => res ^= (byte)x).Last().ToString("X2");
+            var dat=Encoding.ASCII.GetBytes(str);
+            for(int i=0;i<dat.Length;i++)
+            {
+                res ^= dat[i];
+            }
+            return res.ToString("X2");
         }
 
         //抽象类的抽象方法必须由子类实现，虚方法可以在只有需要的时候才实现。
@@ -275,9 +331,20 @@ namespace Protocols.Protocols
             if (v != null) ret = v.Select(x => x == 1).ToArray();
             return ret;
         }
+
+        /// <summary>
+        /// 写多个位时，起始地址必须是0x10的整倍数，写入数据个数也必须是0x10的整倍数，按16位一个字的方式写入
+        /// </summary>
+        /// <param name="regName"></param>
+        /// <param name="Address"></param>
+        /// <param name="Values"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public override bool WriteBool(string regName, int Address, bool[] Values) 
         {
             if (Values == null) return false;
+            if (Values.Length>1 &&Address % 0x10 != 0) throw new InvalidOperationException("地址的末尾必须是0");
+            if (Values.Length>1 && Values.Length % 0x10 != 0) throw new InvalidOperationException("写入数据长度必须是16的整倍数");
             return WriteData(regName , Address, AddressingMode.Bit, Values.Select(x => (byte)(x ? 1 : 0)).ToArray());
         }
 
@@ -402,5 +469,4 @@ namespace Protocols.Protocols
             return WriteData(regName , Address , AddressingMode.Word, buffer);
         }
     }
-
 }
