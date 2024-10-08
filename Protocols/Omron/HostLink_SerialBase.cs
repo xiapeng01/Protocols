@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Protocols.Omron
     /// <summary>
     /// 使用头编码FA的情况
     /// </summary>
-    public class HostLink_Serial : ProtocolBase
+    public class HostLink_SerialBase : ProtocolBase
     {
         string frameHead = "@00FA";
 
@@ -18,7 +19,7 @@ namespace Protocols.Omron
         /// 串口时固定使用7位偶校验1位停止位，默认9600
         /// </summary>
         /// <param name="comm"></param>
-        public HostLink_Serial(IComm comm) : base(comm)
+        public HostLink_SerialBase(IComm comm) : base(comm)
         {
         }        
 
@@ -66,7 +67,7 @@ namespace Protocols.Omron
 
         bool CheckFrame(ref string frame)
         {
-            if(CheckFrame(ref frame,frameHead))
+            if(ValidationFrame(ref frame,frameHead))
             {
                 return CheckFCS(frame);
             }
@@ -624,6 +625,34 @@ namespace Protocols.Omron
             }
             return false;
         }
+    }
+
+    /// <summary>
+    /// 为保持兼容而封装的密封类
+    /// </summary>
+    public sealed class HostLink_Serial : HostLink_SerialBase
+
+    {
+        //以太网-TCP方式
+        //最简构造函数
+        public HostLink_Serial(string ip, int port) : base(new CommTCP(ip, port)) { }
+
+        //不带信号量初始的构造函数
+        public HostLink_Serial(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) { }
+
+        //全参构造函数
+        public HostLink_Serial(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) { }
+
+
+        //串口方式
+        //最简构造函数
+        public HostLink_Serial(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) { }
+
+        //不带信号量初始的构造函数
+        public HostLink_Serial(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) { }
+
+        //全参构造函数
+        public HostLink_Serial(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) { }
 
     }
 }

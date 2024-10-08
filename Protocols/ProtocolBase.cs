@@ -1,7 +1,8 @@
-﻿using System; 
+﻿using System;
 using System.Linq; 
 using System.Text;
 using System.Threading.Tasks;
+using System.IO.Ports;
 
 namespace Protocols
 {
@@ -23,12 +24,12 @@ namespace Protocols
         }
 
         /// <summary>
-        /// 校验帧，只要返回true，就表示从开始处能匹配到帧格式
+        /// 校验帧，只要返回true，就表示从开始处能匹配到帧格式-对于确定长度的帧格式
         /// </summary>
         /// <param name="frame"></param>
         /// <param name="frameHead"></param>
         /// <returns></returns>
-        protected bool CheckFrame(ref byte[] frame, byte[] frameHead)
+        protected bool ValidationFrame(ref byte[] frame, byte[] frameHead,int length=0)
         { 
             if (frame == null || frame.Length<1) return false;//特定情况，提前返回
             if (ByteRangeCompare(frame.Take(frameHead.Length).ToArray(), frameHead)) return true;//从开始就匹配到帧头
@@ -36,21 +37,73 @@ namespace Protocols
             {
                 if(ByteRangeCompare(frame.Skip(i).Take(frameHead.Length).ToArray(),frameHead))
                 {
-                    frame = frame.Skip(i).Take(frame.Length - i).ToArray();//从找到的位置裁切数组
+                    if(length >0) frame = frame.Skip(i).Take(length).ToArray();//对于能确定长度的
+                    else frame = frame.Skip(i).Take(frame.Length - i).ToArray();//从找到的位置裁切数组
                     return true;
                 }
             }
             return false;//一个循环下来未找到符合条件的内容，返回false
         }
 
-        protected bool CheckFrame(ref string frame,string frameHead)
+        /// <summary>
+        /// 校验帧，只要返回true，就表示从开始处能匹配到帧格式-对于确定开头和结尾特征的帧格式
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="frameHead"></param>
+        /// <returns></returns>
+        protected bool ValidationFrame(ref byte[] frame, byte[] frameHead, byte[] frameEnd)
+        {
+            if (frame == null || frame.Length < 1) return false;//特定情况，提前返回
+            if (ByteRangeCompare(frame.Take(frameHead.Length).ToArray(), frameHead)) return true;//从开始就匹配到帧头
+
+            bool findHeadFlag = false;
+            //找帧头
+            for (int i = 0; i < frame.Length - frameHead.Length; i++)
+            {
+                if (ByteRangeCompare(frame.Skip(i).Take(frameHead.Length).ToArray(), frameHead))
+                {
+                    frame = frame.Skip(i).Take(frame.Length - i).ToArray();//从找到的位置裁切数组
+                    findHeadFlag = true;
+                    break;
+                }
+            }
+            if(!findHeadFlag) return false;//未找到帧尾，返回falase
+            //找帧尾
+            for (int i = 0; i < frame.Length - frameEnd.Length; i++)
+            {
+                if (ByteRangeCompare(frame.Skip(i).Take(frameEnd.Length).ToArray(), frameEnd))
+                {
+                    frame = frame.Take(i+ frameEnd.Length).ToArray();//从找到的位置裁切数组
+                    return true;
+                }
+            }
+            return false;//一个循环下来未找到符合条件的内容，返回false
+        }
+
+        protected bool ValidationFrame(ref string frame,string frameHead,int length=0)
         {
             if(string.IsNullOrWhiteSpace(frame) || frame.Length<1) return false;
             if (frame.Contains(frameHead))
             {
                 var startIndex = frame.IndexOf(frameHead);
-                if (startIndex == 0) return true;
-                frame = frame.Substring(startIndex);
+                //if (startIndex == 0) return true;
+                if(length >0) frame = frame.Substring(startIndex,length);//对于指定长度的帧格式
+                else frame = frame.Substring(startIndex);//未指定帧长度则将剩余部分全部返回
+                return true;
+            }
+            return false;
+        }
+
+        protected bool ValidationFrame(ref string frame, string frameHead, string frameEnd)
+        {
+            if (string.IsNullOrWhiteSpace(frame) || frame.Length < 1) return false;
+            if (frame.Contains(frameHead))
+            {
+                var startIndex = frame.IndexOf(frameHead);
+                frame = frame.Substring(startIndex);//未指定帧长度则将剩余部分全部返回
+                var endIndex = frame.IndexOf(frameEnd);
+                frame = frame.Substring(0,endIndex);
+                return true;
             }
             return false;
         }

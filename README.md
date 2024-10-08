@@ -1,7 +1,7 @@
 # Protocols-工业设备通信协议库<br>
 一个为爱发电项目，正在逐步完善中   
 在VS2022+.Net Framework4.8 + HslCommunication 本地测试通过（只测试了M,D寄存器）<br> 
-目前只支持TCP方式和串口方式，欢迎反馈bug<br>
+目前基本功能能用但并没有达到理想的程度，且性能并没有优化到最佳的状态，修复了部分已知bug，欢迎反馈bug（QQ:706806660）<br>
 感谢以下好友提供的帮助：<br>
 拓拓(https://github.com/kongdetuo)<br>
 SlimeNull(https://github.com/SlimeNull)<br>
@@ -29,32 +29,58 @@ using System.Threading.Tasks;
 using ConsoleDump;
 using Protocols.Protocols;
 using Protocols.Omron;
-namespace Protocols
+using System.Xml.Linq;
+using Protocols;
+using System.Diagnostics;
+
+namespace TestProtocols
 {
     internal class TestProtocol
     {
         static void Main(string[] args)
         {
-            //测试三菱MC-3E
+            ////测试三菱MC-3E
             //TestProtocolBase(new MC_3E("127.0.0.1", 6000), "M", 100, "D", 100);
-            TestProtocolBase(new MC_3Ebase(new CommUDP("127.0.0.1", 6000)), "M", 100, "D", 100);
+            //TestProtocolBase(new MC_3E2("127.0.0.1", 6000), "M", 100, "D", 100);
 
-            //测试松下Mewtocol 
-            //TestProtocolBase(new Mewtocol(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)),"R",100,"D",100);
+            ////测试松下Mewtocol 
+            //TestProtocolBase(new Mewtocol("COM1", 9600, 8, Parity.None, StopBits.One),"R",0x100,"D",100);
 
-            //测试欧姆龙FINS
-            //TestProtocolBase(new HostLink_Serial(new CommSerialPort("COM1", 9600, 7, Parity.Even, StopBits.One)),"CIO",10000,"D",100);
-            //TestProtocolBase(new Fins(new CommTCP("127.0.0.1", 9600)),"CIO",10000,"D",100);
-            //TestProtocolBase(new Fins(new CommUDP("127.0.0.1", 9600)), "CIO", 10000, "D", 100);//帧格式不对
+            ////测试欧姆龙FINS
+            ////使用HostLinkServer
+            //TestProtocolBase(new HostLink_Serial("COM1", 9600, 7, Parity.Even, StopBits.One),"CIO",10000,"D",100);
+            //TestProtocolBase(new Fins("127.0.0.1", 9600),"CIO",10000,"D",100);//使用 Fins Virtual Server
+            //TestProtocolBase(new Fins("127.0.0.1", 9600), "CIO", 10000, "D", 100);//帧格式不对
 
-            //TestModbus(new ASCII(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
-            //TestModbus(new RTU(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
-            //TestModbus(new TCP(new CommNet("127.0.0.1", 502)));
-            //TestModbus(new TCP(new CommUDP("127.0.0.1", 502)));
+            ///测试Modbus
+            //TestModbus(new Modbus_ASCII("COM1", 9600, 8, Parity.None, StopBits.One));
+            //TestModbus(new Modbus_RTU("COM1", 9600, 8, Parity.None, StopBits.One));
+            //TestModbus(new Modbus_TCP("127.0.0.1", 502));
+            //TestModbus(new Modbus_TCP("127.0.0.1", 502));
 
+            Analyse(new MC_3E2("127.0.0.1", 6000),"D",100, 950);
+            Console.Read();
         }
 
-        static void TestModbus(ModbusBase m)
+        static void Analyse(ProtocolBase m,string regName,int address,int count)
+        {
+            var sw2 = new Stopwatch();
+            sw2.Start();
+            for (int i=0;i<1000;i++)
+            {
+                var sw1 = new Stopwatch();
+                sw1.Start();
+                m.WriteInt16(regName,address,(Int16)i);
+                var res= m.ReadInt16(regName,address,count);
+                sw1.Stop();
+                Console.WriteLine($"{regName}:{res.First()},Elapsed:{sw1.ElapsedMilliseconds}ms");
+            }
+            sw2.Stop();
+            Console.WriteLine($"总耗时：{sw2.ElapsedMilliseconds}ms.");
+        }
+
+
+        static void TestModbus(AModbus m)
         {
 
             "".Dump("读写单个寄存器"); 
@@ -82,7 +108,7 @@ namespace Protocols
 
 
             "读写多个寄存器".Dump("读写多个寄存器"); 
-            m.WriteMultipleCoils(1, 100, new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true }).Dump(); 
+            m.WriteMultipleCoils(1, 100, new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true, false }).Dump(); 
             m.ReadCoils(1, 100, 20).Dump();
              
             m.WriteMultipleRegisters<Int16>(1, (Int16)100, new Int16[] { 1234, 1234, 1234, 1234, 1234 }).Dump(); 
@@ -144,7 +170,7 @@ namespace Protocols
 
 
                 Console.WriteLine("读写多个元件"); 
-                m.WriteBool(bitRegName, bitAddress, new bool[] { true, false, true, false, true }).Dump("写5个布尔值：");
+                m.WriteBool(bitRegName, bitAddress, new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true, false }).Dump("写5个布尔值：");
                 m.ReadBool(bitRegName, bitAddress, 5).Dump("读5个布尔值：");
                  
                 m.WriteInt16(dataRegName, dataAddress, new Int16[] { 1, 2, 3, 4, 5 }).Dump("写5个有符号字：");
@@ -193,7 +219,7 @@ namespace Protocols
 
                 //读写多个元件
                 Console.WriteLine("读写多个元件"); 
-                m.WriteData<bool[]>(bitRegName, bitAddress, (object)new bool[] { true, false, true, false, true }).Dump("泛型写5布尔值");
+                m.WriteData<bool[]>(bitRegName, bitAddress, (object)new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true, false }).Dump("泛型写5布尔值");
                 m.ReadData<bool[]>(bitRegName, bitAddress, 5).Dump("泛型读5布尔值");
                  
                 m.WriteData<Int16[]>(dataRegName, dataAddress, (object)new Int16[] { 1, 2, 3, 4, 5 }).Dump("泛型写5INT16");
@@ -239,7 +265,7 @@ namespace Protocols
 
                  
                 Console.WriteLine("读写多个元件"); 
-                m.WriteDataAsync<bool[]>(bitRegName, bitAddress, (object)new bool[] { true, false, true, false, true }).Result.Dump("泛型写5布尔值");
+                m.WriteDataAsync<bool[]>(bitRegName, bitAddress, (object)new bool[] { true, false, true, false, true, true, false, true, false, true, true, false, true, false, true, false }).Result.Dump("泛型写5布尔值");
                 m.ReadDataAsync<bool[]>(bitRegName, bitAddress, 5).Result.Dump("泛型读5布尔值");
                  
                 m.WriteDataAsync<Int16[]>(dataRegName, dataAddress, (object)new Int16[] { 1, 2, 3, 4, 5 }).Result.Dump("泛型写5INT16");

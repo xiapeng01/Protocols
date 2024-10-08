@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Protocols
 {
-    public class MC_3Ebase : ProtocolBase
+    public class MC_3EBase : ProtocolBase
     {
         const int iHeadFrameLength = 32;
         const int iDataFrameLength = 64;
@@ -21,10 +21,11 @@ namespace Protocols
         byte[] receiveFrameHead;
 
         //带IP，端口号设置的构造函数
-        public MC_3Ebase(IComm comm) : base(comm)//显式调用基类的构造函数
+        public MC_3EBase(IComm comm) : base(comm)//显式调用基类的构造函数
         {
             sendFrameHead = HexStringToByteArray(sendHead);
             receiveFrameHead = HexStringToByteArray(receiveHead);
+            comm.Open();
         }
 
         /// <summary>
@@ -32,9 +33,9 @@ namespace Protocols
         /// </summary>
         /// <param name="frame"></param>
         /// <returns></returns>
-       protected bool CheckFrame(ref byte[] frame)
+       protected bool ValidationFrame(ref byte[] frame)
        {
-            return CheckFrame(ref frame, receiveFrameHead);
+            return ValidationFrame(ref frame, receiveFrameHead);
        }
 
         //获取寄存器对应的符号编号
@@ -126,7 +127,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
             
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new bool[Count];//初始化返回值数组
                 string strContent = "";//要将内容填充进去
@@ -185,7 +186,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -237,6 +238,7 @@ namespace Protocols
             sbData.Append("0000");//子指令 
             sbData.Append(ToBigEndianHexString(Address).Substring(0, 6));//起始软元件十六进制大端格式
             sbData.Append(GetRegCode(regName));//软元件代码	 
+            var rr1 = ToBigEndianHexString(Count).Substring(0, 4);
             sbData.Append(ToBigEndianHexString(Count).Substring(0, 4));//软元件点数
              
             //获取请求数据长度
@@ -247,7 +249,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new short[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -281,7 +283,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -308,7 +310,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new UInt16[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -342,7 +344,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -370,7 +372,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new Int32[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -404,7 +406,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -431,7 +433,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new UInt32[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -465,7 +467,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -492,7 +494,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 ret = new Single[Count];//初始化返回值数组
                 for (int i = 0; i < Count; i++)//填充返回值数组
@@ -526,7 +528,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -554,7 +556,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 byte[] dat = new byte[Count];
                 Array.Copy(receiveData, receiveDataHeadLength, dat, 0, Count);
@@ -585,7 +587,7 @@ namespace Protocols
             var receiveData = _comm.Send(sendData);//接收数据
 
             //校验接收到的数据
-            if (CheckFrame(ref receiveData))//接收内容符合格式要求,
+            if (ValidationFrame(ref receiveData))//接收内容符合格式要求,
             {
                 return true;//校验成功，返回
             }
@@ -593,8 +595,10 @@ namespace Protocols
         }
     }
 
-    //为保持兼容而封装的密封类
-    public sealed class MC_3E : MC_3Ebase
+    /// <summary>
+    /// 为保持兼容而封装的密封类
+    /// </summary>
+    public sealed class MC_3E : MC_3EBase
     {
         //以太网-TCP方式
         //最简构造函数

@@ -10,6 +10,7 @@ using Protocols.Protocols;
 using Protocols.Omron;
 using System.Xml.Linq;
 using Protocols;
+using System.Diagnostics;
 
 namespace TestProtocols
 {
@@ -17,27 +18,48 @@ namespace TestProtocols
     {
         static void Main(string[] args)
         {
-            //测试三菱MC-3E
+            ////测试三菱MC-3E
             //TestProtocolBase(new MC_3E("127.0.0.1", 6000), "M", 100, "D", 100);
-            //TestProtocolBase(new MC_3Ebase(new CommUDP("127.0.0.1", 6000)), "M", 100, "D", 100);
+            //TestProtocolBase(new MC_3E2("127.0.0.1", 6000), "M", 100, "D", 100);
 
-            //测试松下Mewtocol 
-            //TestProtocolBase(new Mewtocol(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)),"R",0x100,"D",100);
+            ////测试松下Mewtocol 
+            //TestProtocolBase(new Mewtocol("COM1", 9600, 8, Parity.None, StopBits.One),"R",0x100,"D",100);
 
-            //测试欧姆龙FINS
-            //使用HostLinkServer
-            //TestProtocolBase(new HostLink_Serial(new CommSerialPort("COM1", 9600, 7, Parity.Even, StopBits.One)),"CIO",10000,"D",100);
-            //TestProtocolBase(new Fins(new CommTCP("127.0.0.1", 9600)),"CIO",10000,"D",100);
-            //TestProtocolBase(new Fins(new CommUDP("127.0.0.1", 9600)), "CIO", 10000, "D", 100);//帧格式不对
+            ////测试欧姆龙FINS
+            ////使用HostLinkServer
+            //TestProtocolBase(new HostLink_Serial("COM1", 9600, 7, Parity.Even, StopBits.One),"CIO",10000,"D",100);
+            //TestProtocolBase(new Fins("127.0.0.1", 9600),"CIO",10000,"D",100);//使用 Fins Virtual Server
+            //TestProtocolBase(new Fins("127.0.0.1", 9600), "CIO", 10000, "D", 100);//帧格式不对
 
-            //TestModbus(new ASCII(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
-            //TestModbus(new RTU(new CommSerialPort("COM1", 9600, 8, Parity.None, StopBits.One)));
-            //TestModbus(new TCP(new CommTCP("127.0.0.1", 502)));
-            //TestModbus(new TCP(new CommUDP("127.0.0.1", 502)));
+            ///测试Modbus
+            //TestModbus(new Modbus_ASCII("COM1", 9600, 8, Parity.None, StopBits.One));
+            //TestModbus(new Modbus_RTU("COM1", 9600, 8, Parity.None, StopBits.One));
+            //TestModbus(new Modbus_TCP("127.0.0.1", 502));
+            //TestModbus(new Modbus_TCP("127.0.0.1", 502));
 
+            Analyse(new MC_3E2("127.0.0.1", 6000),"D",100, 950);
+            Console.Read();
         }
 
-        static void TestModbus(ModbusBase m)
+        static void Analyse(ProtocolBase m,string regName,int address,int count)
+        {
+            var sw2 = new Stopwatch();
+            sw2.Start();
+            for (int i=0;i<1000;i++)
+            {
+                var sw1 = new Stopwatch();
+                sw1.Start();
+                m.WriteInt16(regName,address,(Int16)i);
+                var res= m.ReadInt16(regName,address,count);
+                sw1.Stop();
+                Console.WriteLine($"{regName}:{res.First()},Elapsed:{sw1.ElapsedMilliseconds}ms");
+            }
+            sw2.Stop();
+            Console.WriteLine($"总耗时：{sw2.ElapsedMilliseconds}ms.");
+        }
+
+
+        static void TestModbus(AModbus m)
         {
 
             "".Dump("读写单个寄存器"); 

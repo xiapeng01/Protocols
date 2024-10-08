@@ -23,15 +23,17 @@ namespace Protocols
         //byte[] Send(Action<Stream> action, byte[] sendData);//用于收发需要额外握手的协议内容
         byte[] Send(Func<bool> handShake, byte[] sendData);//带额外握手的方法
         Task<byte[]> SendAsync(byte[] sendData);//用于异步收发内容-暂未用
-        Task<byte[]> SendAsync(byte[] sendData, Func<byte[],bool> VerifyFrame);//用于异步收发内容-暂未用-带校验帧
-        void Close();
+        Task<byte[]> SendAsync(byte[] sendData, Func<byte[],bool> ValidationFrame);//用于异步收发内容-暂未用-带帧校验
+
+        bool Open();
+        bool Close();
     }
 
     //为减少代码重写的抽象类
     public abstract class AComm : IComm, IDisposable
     {
         protected int waitReadDelay = 0;
-        protected int bufferSize = 1024;
+        protected int bufferSize = 2500;//1024;//部分协议有最大读写数量限制
         protected static SemaphoreSlim sem1 = new SemaphoreSlim(1, 1);
         protected static SemaphoreSlim sem2 = new SemaphoreSlim(1, 1);
         protected static int _minSemaphore = 1;
@@ -69,16 +71,16 @@ namespace Protocols
             });            
         }
 
-        public Task<Byte[]> SendAsync(byte[] sendData, Func<byte[],bool> VerifyFrame)
+        public Task<Byte[]> SendAsync(byte[] sendData, Func<byte[],bool> ValidationFrame)
         {
             return Task.Run<Byte[]>(() => {
                 var ret=Send(sendData);
-                if(VerifyFrame(ret)) return Task.FromResult<byte[]>(ret);
+                if(ValidationFrame(ret)) return Task.FromResult<byte[]>(ret);
                 return Task.FromResult<Byte[]>(null);
             });
         }
-
-        public abstract void Close();
+        public abstract bool Open();
+        public abstract bool Close();
         public abstract void Dispose();       
     }
 
@@ -166,15 +168,14 @@ namespace Protocols
                     RemoteIp = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
 
                     //应在此时调用子类的方法发送握手包
-                    for (int i = 0; i < 3; i++) if (handShakeDelegate?.Invoke() ?? false) break;//握手
- 
+                    for (int i = 0; i < 3; i++) if (handShakeDelegate?.Invoke() ?? false) break;//握手 
                 }
                 
                 if (!client.Connected) client.Connect(_ip, _port);
                 client.ReceiveTimeout = _timeOut;
 
-                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内             
-                
+                byte[] ret = new byte[bufferSize];//单次读写最多480字对应960字节，加上固定的报文头，1024字节以内    
+
                 var s = client.GetStream();
                 s.Write(sendData, 0, sendData.Length);
                 Thread.Sleep(waitReadDelay);
@@ -184,15 +185,29 @@ namespace Protocols
                 return ret;
             }
         }
-         
 
-        public override void Close()
+        public override bool Open()
+        {
+            try
+            {
+                client = new TcpClient();
+                client.Connect(_ip, _port);
+                return true;
+            }
+            catch { }
+            return false;
+        }
+
+
+        public override bool Close()
         {
             try
             {
                 client?.Close();
+                return true;
             }
             catch{}
+            return false;
         }
 
         public override void Dispose()
@@ -299,14 +314,30 @@ namespace Protocols
             return ret;
         }
 
+        public override bool Open()
+        {
+            try
+            {
+                if (localIPE == null) localIPE = new IPEndPoint(IPAddress.Any, 0);
+                if (remoteIPE == null) remoteIPE = new IPEndPoint(IPAddress.Parse(_ip), _port);
 
-        public override void Close()
+                if (client == null) client = new UdpClient(localIPE);
+ 
+                return true;
+            }
+            catch { }
+            return false;
+        }
+
+        public override bool Close()
         {
             try
             {
                 client?.Close();
+                return true;
             }
             catch { }
+            return false;
         }
 
         public override void Dispose()
@@ -440,15 +471,40 @@ namespace Protocols
                 Array.Resize(ref ret, n);
                 return ret;
             }
-        } 
+        }
 
-        public override void Close()
+        public override bool Open()
+        {
+            try
+            {
+                var ports = SerialPort.GetPortNames();
+                if (!ports.Any(p => p.Contains(_portName))) throw new InvalidDataException($"串口:{_portName}不存在");
+                if (sp == null)
+                {
+                    sp = new SerialPort();
+                    sp.PortName = _portName;
+                    sp.BaudRate = _baudRate;
+                    sp.DataBits = _dataBits;
+                    sp.Parity = _parity;
+                    sp.StopBits = _stopBits;
+
+                    sp.Open(); 
+                }
+                return true;
+            }
+            catch { }
+            return false;
+        }
+
+        public override bool Close()
         {
             try
             {
                 sp?.Close();
+                return true;
             }
             catch { }
+            return false;
         }
 
         public override void Dispose()

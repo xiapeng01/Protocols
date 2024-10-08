@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Protocols.Protocols;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -9,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Protocols.Omron
 {
-    public class Fins : ProtocolBase
+    public class FinsBase : ProtocolBase
     {
         bool IsHandShake = false;
         static byte[] handShakeHead = Array.Empty<byte>();
@@ -24,7 +26,7 @@ namespace Protocols.Omron
         byte SA1 = 0x01;//源IP最后一个字段
         byte DA1 = 0x01;//目标IP最后一个字段
 
-        public Fins(IComm comm) : base(comm)
+        public FinsBase(IComm comm) : base(comm)
         {
             handShakeHead = HexStringToByteArray("46 49 4E 53 00 00 00 0C 00 00 00 00 00 00 00 00 00 00 00 ".Replace(" ", ""));
             handShakeResponse = HexStringToByteArray("46 49 4E 53 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 01 00 00 00 02".Replace(" ", ""));
@@ -65,15 +67,15 @@ namespace Protocols.Omron
         /// <param name="frame"></param>
         /// <param name="SID"></param>
         /// <returns></returns>
-        bool CheckFrame(ref byte[] frame, byte SID)
+        bool ValidationFrame(ref byte[] frame, byte SID)
         {
             if (frame == null || frame.Length < 14) return false;
-            if (CheckFrame(ref frame, frameHead))
+            if (ValidationFrame(ref frame, frameHead))
             {
                 if (frame[25] == SID && ByteRangeCompare(frame.Skip(12).Take(4).ToArray(), frameConditon))
                 {
                     return true;
-                }//从一开始匹配到
+                } 
             }
             return false;
         }
@@ -195,7 +197,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -310,7 +312,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -403,7 +405,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -519,7 +521,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -612,7 +614,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -728,7 +730,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -822,7 +824,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -938,7 +940,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -1031,7 +1033,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -1147,7 +1149,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -1241,7 +1243,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 //拆数据
                 var dataStartPos = 30;
@@ -1357,7 +1359,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 return true;
 
@@ -1450,7 +1452,7 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 //拆数据-不进行高低字节交换
                 var dataStartPos = 30;
@@ -1560,11 +1562,40 @@ namespace Protocols.Omron
             msData = null;
 
             //校验接收数据，然后拆出有用数据
-            if (CheckFrame(ref receiveData, SID))
+            if (ValidationFrame(ref receiveData, SID))
             {
                 return true;
             }
             return false;
         }
+    }
+
+    /// <summary>
+    /// 为保持兼容而封装的密封类
+    /// </summary>
+    public sealed class Fins : FinsBase
+
+    {
+        //以太网-TCP方式
+        //最简构造函数
+        public Fins(string ip, int port) : base(new CommTCP(ip, port)) { }
+
+        //不带信号量初始的构造函数
+        public Fins(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) { }
+
+        //全参构造函数
+        public Fins(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) { }
+
+
+        //串口方式
+        //最简构造函数
+        public Fins(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) { }
+
+        //不带信号量初始的构造函数
+        public Fins(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) { }
+
+        //全参构造函数
+        public Fins(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) { }
+
     }
 }

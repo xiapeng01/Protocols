@@ -2,6 +2,7 @@
 using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
@@ -12,12 +13,13 @@ using System.Threading.Tasks;
 
 namespace Protocols.Protocols
 {
-    public abstract class ModbusBase 
+    public abstract class AModbus 
     {
         protected IComm Comm;
-        public ModbusBase(IComm comm) 
+        public AModbus(IComm comm) 
         { 
             Comm = comm; 
+            comm.Open();
         }
 
         public enum FrameFormatEnum{ABCD,BADC,CDAB,DCBA }//4种字节格式
@@ -546,9 +548,9 @@ namespace Protocols.Protocols
         protected abstract bool WriteRegisters<T>(int StationNumber, byte FunctionCode, int Address, T[] Values);
     }
 
-    public class RTU : ModbusBase
+    public class Modbus_RTUBase : AModbus
     {
-        public RTU(IComm comm) : base(comm)
+        public Modbus_RTUBase(IComm comm) : base(comm)
         {
 
         }
@@ -621,7 +623,7 @@ namespace Protocols.Protocols
         protected override T[] ReadRegisters<T>(int StationNumber, byte FunctionCode, int Address, int Count)
         {
             T[] ret = Array.Empty<T>();
-            var ms = new MemoryStream();
+            var ms = new MemoryStream();            
 
             ms.WriteByte((byte)StationNumber);//站号            
             ms.WriteByte((byte)FunctionCode);//功能码
@@ -831,9 +833,9 @@ namespace Protocols.Protocols
     }
 
 
-    public class ASCII : ModbusBase
+    public class Modbus_ASCIIBase : AModbus
     {
-        public ASCII(IComm comm) : base(comm)
+        public Modbus_ASCIIBase(IComm comm) : base(comm)
         {
 
         }
@@ -1139,9 +1141,9 @@ namespace Protocols.Protocols
     }
 
 
-    public class TCP : ModbusBase
+    public class Modbus_TCPBase : AModbus
     {
-        public TCP(IComm comm) : base(comm)
+        public Modbus_TCPBase(IComm comm) : base(comm)
         {
 
         }
@@ -1539,4 +1541,91 @@ namespace Protocols.Protocols
             return false;
         }
     }
+
+
+    /// <summary>
+    /// 为保持兼容而封装的密封类
+    /// </summary>
+    public sealed class Modbus_ASCII : Modbus_ASCIIBase
+    {
+        //以太网-TCP方式
+        //最简构造函数
+        public Modbus_ASCII(string ip, int port) : base(new CommTCP(ip, port)) { }
+
+        //不带信号量初始的构造函数
+        public Modbus_ASCII(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) { }
+
+        //全参构造函数
+        public Modbus_ASCII(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) { }
+
+
+        //串口方式
+        //最简构造函数
+        public Modbus_ASCII(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) { }
+
+        //不带信号量初始的构造函数
+        public Modbus_ASCII(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) { }
+
+        //全参构造函数
+        public Modbus_ASCII(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) { }
+
+    }
+
+    /// <summary>
+    /// 为保持兼容而封装的密封类
+    /// </summary>
+    public sealed class Modbus_RTU : Modbus_RTUBase
+    {
+        //以太网-TCP方式
+        //最简构造函数
+        public Modbus_RTU(string ip, int port) : base(new CommTCP(ip, port)) { }
+
+        //不带信号量初始的构造函数
+        public Modbus_RTU(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) { }
+
+        //全参构造函数
+        public Modbus_RTU(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) { }
+
+
+        //串口方式
+        //最简构造函数
+        public Modbus_RTU(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) { }
+
+        //不带信号量初始的构造函数
+        public Modbus_RTU(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) { }
+
+        //全参构造函数
+        public Modbus_RTU(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) { }
+
+    }
+
+
+    /// <summary>
+    /// 为保持兼容而封装的密封类
+    /// </summary>
+    public sealed class Modbus_TCP : Modbus_TCPBase
+    {
+        //以太网-TCP方式
+        //最简构造函数
+        public Modbus_TCP(string ip, int port) : base(new CommTCP(ip, port)) { }
+
+        //不带信号量初始的构造函数
+        public Modbus_TCP(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) { }
+
+        //全参构造函数
+        public Modbus_TCP(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) { }
+
+
+        //串口方式
+        //最简构造函数
+        public Modbus_TCP(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) { }
+
+        //不带信号量初始的构造函数
+        public Modbus_TCP(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) { }
+
+        //全参构造函数
+        public Modbus_TCP(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) { }
+
+    }
+
 }

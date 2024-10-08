@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace Protocols.Protocols
 {
-    public class Mewtocol : ProtocolBase
+    public class MewtocolBase : ProtocolBase
     { 
         private readonly object Lock_Serial = new object();
         private readonly object LogFile = new object();
@@ -19,9 +19,9 @@ namespace Protocols.Protocols
 
         public enum AddressingMode { Bit = 0, Word = 1 }
 
-        public Mewtocol(IComm comm) : base(comm)
+        public MewtocolBase(IComm comm) : base(comm)
         {
-
+            comm.Open();
         }
 
         bool CheckFrame(ref string data, string startSymbol, string endSymbol, int minLength = 0)
@@ -468,5 +468,34 @@ namespace Protocols.Protocols
             var buffer = Encoding.ASCII.GetBytes(Values.Length % 2 == 0 ? Values : Values + (char)0x00);
             return WriteData(regName , Address , AddressingMode.Word, buffer);
         }
+    }
+
+    /// <summary>
+    /// 为保持兼容而封装的密封类
+    /// </summary>
+    public sealed class Mewtocol :MewtocolBase 
+
+    {
+        //以太网-TCP方式
+        //最简构造函数
+        public Mewtocol(string ip, int port) : base(new CommTCP(ip, port)) { }
+
+        //不带信号量初始的构造函数
+        public Mewtocol(string ip, int port, int timeOut) : base(new CommTCP(ip, port, timeOut)) { }
+
+        //全参构造函数
+        public Mewtocol(string ip, int port, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommTCP(ip, port, timeOut, minSemaphore, maxSemaphore)) { }
+
+
+        //串口方式
+        //最简构造函数
+        public Mewtocol(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits)) { }
+
+        //不带信号量初始的构造函数
+        public Mewtocol(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut)) { }
+
+        //全参构造函数
+        public Mewtocol(string portName, int baudRate, int dataBits, Parity parity, StopBits stopBits, int timeOut, int minSemaphore, int maxSemaphore) : base(new CommSerialPort(portName, baudRate, dataBits, parity, stopBits, timeOut, minSemaphore, maxSemaphore)) { }
+
     }
 }

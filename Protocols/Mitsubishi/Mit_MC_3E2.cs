@@ -21,7 +21,7 @@ namespace Protocols
         //带IP，端口号设置的构造函数
         public MC_3Ebase2(IComm comm) : base(comm)//显式调用基类的构造函数
         {
-
+            comm.Open();
         }
 
         //获取寄存器对应的符号编号
@@ -526,7 +526,9 @@ namespace Protocols
         }
     }
 
-    //为保持兼容而封装的密封类
+    /// <summary>
+    /// 为保持兼容而封装的密封类
+    /// </summary>
     public sealed class MC_3E2 : MC_3Ebase2
     {
         //以太网方式
