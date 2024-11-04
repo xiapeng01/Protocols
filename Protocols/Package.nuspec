@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+	<metadata>
+		<id>Protocols</id>
+		<version>$Version$</version>
+		<title>Protocols.Net</title>
+		<authors>xiapeng01@live.cn</authors>
+		<owners>xiapeng01</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<license type="expression">MIT</license>
+		<projectUrl>https://github.com/xiapeng01/Protocols</projectUrl>
+		<readme>README.md</readme>
+		<description>一个开源的工业设备通讯协议库，正在逐步完善中。</description>
+		<copyright>Copyright (c) 2024 XiaPeng</copyright>
+		<tags>Protocols;MC_3E;Fins;Mewtocol</tags>
+		<dependencies>
+			<group targetFramework=".NETFramework4.6.2" />
+			<group targetFramework=".NETFramework4.8" />
+			<group targetFramework=".NET6.0" />
+			<group targetFramework=".NET8.0" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="LICENSE.txt" target="LICENSE.txt" />
+		<file src="README.md" target="README.md" />
+
+		<file src="bin\Release\net462\LICENSE.txt" target="lib\net462\LICENSE.txt"/>
+		<file src="bin\Release\net462\Protocols.dll" target="lib\net462\Protocols.dll"/>
+		<file src="bin\Release\net462\Protocols.dll.config" target="lib\net462\Protocols.dll.config"/>
+		<file src="bin\Release\net462\Protocols.pdb" target="lib\net462\Protocols.pdb"/>
+		<file src="bin\Release\net462\System.IO.Ports.dll" target="lib\net462\System.IO.Ports.dll"/>
+		<file src="bin\Release\net480\LICENSE.txt" target="lib\net480\LICENSE.txt"/>
+		<file src="bin\Release\net480\Protocols.dll" target="lib\net480\Protocols.dll"/>
+		<file src="bin\Release\net480\Protocols.dll.config" target="lib\net480\Protocols.dll.config"/>
+		<file src="bin\Release\net480\Protocols.pdb" target="lib\net480\Protocols.pdb"/>
+		<file src="bin\Release\net480\System.IO.Ports.dll" target="lib\net480\System.IO.Ports.dll"/>
+		<file src="bin\Release\net6.0\LICENSE.txt" target="lib\net6.0\LICENSE.txt"/>
+		<file src="bin\Release\net6.0\Protocols.dll" target="lib\net6.0\Protocols.dll"/>
+		<file src="bin\Release\net6.0\Protocols.dll.config" target="lib\net6.0\Protocols.dll.config"/>
+		<file src="bin\Release\net6.0\Protocols.pdb" target="lib\net6.0\Protocols.pdb"/> 
+		<file src="bin\Release\net8.0\LICENSE.txt" target="lib\net8.0\LICENSE.txt"/>
+		<file src="bin\Release\net8.0\Protocols.dll" target="lib\net8.0\Protocols.dll"/>
+		<file src="bin\Release\net8.0\Protocols.dll.config" target="lib\net8.0\Protocols.dll.config"/>
+		<file src="bin\Release\net8.0\Protocols.pdb" target="lib\net8.0\Protocols.pdb"/> 	
+		
+	</files>
+</package>

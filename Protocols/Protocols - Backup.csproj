@@ -4,7 +4,7 @@
     <TargetFrameworks>net462;net480;net6.0;net8.0</TargetFrameworks> 
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
-    <Version>0.1.19</Version>
+    <Version>0.1.4</Version>
 	  <GenerateNuspec>true</GenerateNuspec>
 	  <NuspecFile>Package.nuspec</NuspecFile>
     <!-- <NuspecProperties>id=$(AssemblyName);version=$(VersionPrefix);title=$(Title);authors=$(Authors);requireLicenseAcceptance=$(PackageRequireLicenseAcceptance);license=$(PackageLicenseExpression);icon=$(PackageIcon);projectUrl=$(PackageProjectUrl);iconUrl=$(PackageIconUrl);description=$(Description);releaseNotes=$(PackageReleaseNotes);copyright=$(Copyright);repositoryType=$(RepositoryType);repositoryUrl=$(PackageProjectUrl);repositoryCommit=$(RepositoryCommit);buildOutput=bin\$(Configuration)</NuspecProperties> -->
@@ -14,26 +14,26 @@
 	  <PackageProjectUrl>https://github.com/xiapeng01/Protocols</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/xiapeng01/Protocols</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <PackageLicenseExpression>MIT License</PackageLicenseExpression>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <Copyright>Copyright (c) 2024 XiaPeng</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-    <None Include="README.md" Pack="true" PackagePath="\" CopyToOutputDirectory="Always"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="LICENSE.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <!-- <<None Update="README.md">
+    <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
-    </None> -->
+    </None>
   </ItemGroup>
 	<Target Name="SetPackageVersion" BeforeTargets="Pack">
 		<PropertyGroup>
-			<PackageVersion>$(Version)</PackageVersion>
+			<PackageVersion>1.2.3.4</PackageVersion>
 		</PropertyGroup>
 		<Message Text="NuGetPackageVersion: $(PackageVersion)" Importance="high" />
 	</Target>
