@@ -15,18 +15,10 @@
 		<copyright>Copyright (c) 2024 XiaPeng</copyright>
 		<tags>Protocols;MC_3E;Fins;Mewtocol</tags>
 		<dependencies>
-			<group targetFramework=".NETFramework4.6.2" >
-				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
-			</group>
-			<group targetFramework=".NETFramework4.8" >
-				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
-			</group>
-			<group targetFramework=".NET6.0">
-				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
-			</group>
-			<group targetFramework=".NET8.0">
-				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
-			</group>
+			<group targetFramework=".NETFramework4.6.2"/>
+			<group targetFramework=".NETFramework4.8"/>
+			<group targetFramework=".NET6.0"/>
+			<group targetFramework=".NET8.0"/>
 		</dependencies>
 	</metadata>
 	<files>
