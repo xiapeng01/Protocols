@@ -33,5 +33,9 @@ jobs:
     - name: Pack
       run:  dotnet pack Protocols/Protocols.csproj --configuration Release /p:Version=0.1.20 --output dist --no-build --no-restore
 
+    # 需在github库中设置${{ secrets.NUGET_API_KEY }}
+    - name: Publish NuGet package
+      run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY_Protocols }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
     - name: Show Dir
       run: tree
