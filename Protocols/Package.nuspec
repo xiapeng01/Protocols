@@ -16,7 +16,7 @@
 		<tags>Protocols;MC_3E;Fins;Mewtocol</tags>
 		<dependencies>
 			<group targetFramework=".NETFramework4.6.2"/>
-			<group targetFramework=".NETFramework4.8"/>
+			<group targetFramework=".NETFramework4.8.0"/>
 			<group targetFramework=".NET6.0"/>
 			<group targetFramework=".NET8.0"/>
 		</dependencies>
