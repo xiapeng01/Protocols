@@ -4,20 +4,19 @@
     <TargetFrameworks>net462;net480;net6.0;net8.0</TargetFrameworks> 
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
-    <Version>0.1.22</Version>
-	  <GenerateNuspec>true</GenerateNuspec>
-	  <NuspecFile>Package.nuspec</NuspecFile>
+    <Version>0.1.23</Version>
+	<GenerateNuspec>true</GenerateNuspec>
+	<NuspecFile>Package.nuspec</NuspecFile>
     <!-- <NuspecProperties>id=$(AssemblyName);version=$(VersionPrefix);title=$(Title);authors=$(Authors);requireLicenseAcceptance=$(PackageRequireLicenseAcceptance);license=$(PackageLicenseExpression);icon=$(PackageIcon);projectUrl=$(PackageProjectUrl);iconUrl=$(PackageIconUrl);description=$(Description);releaseNotes=$(PackageReleaseNotes);copyright=$(Copyright);repositoryType=$(RepositoryType);repositoryUrl=$(PackageProjectUrl);repositoryCommit=$(RepositoryCommit);buildOutput=bin\$(Configuration)</NuspecProperties> -->
-	  <NuspecProperties>Configuration=$(Configuration);version=$(Version)</NuspecProperties>
-	  <Title>Protocols</Title>
-	  <Description>一个开源的工业设备通讯协议库，正在逐步完善中。</Description>
-	  <PackageProjectUrl>https://github.com/xiapeng01/Protocols</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/xiapeng01/Protocols</RepositoryUrl>
-	  <RepositoryType>git</RepositoryType>
+	<NuspecProperties>Configuration=$(Configuration);version=$(Version)</NuspecProperties>
+	<Title>Protocols</Title>
+	<Description>一个开源的工业设备通讯协议库，正在逐步完善中。</Description>
+	<PackageProjectUrl>https://github.com/xiapeng01/Protocols</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/xiapeng01/Protocols</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <PackageLicenseExpression>MIT License</PackageLicenseExpression>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <Copyright>Copyright (c) 2024 XiaPeng</Copyright>
+	<PackageLicenseExpression>MIT License</PackageLicenseExpression>
+	<Copyright>Copyright (c) 2024 XiaPeng</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,10 +26,10 @@
       <PackagePath>\</PackagePath>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <!-- <<None Update="README.md">
+    <None Update="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
-    </None> -->
+    </None> 
   </ItemGroup>
 	<Target Name="SetPackageVersion" BeforeTargets="Pack">
 		<PropertyGroup>
