@@ -31,8 +31,7 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
  
     - name: Pack
-      run:  cd Protocols
-            dotnet pack --configuration Release /p:PackageVersion=0.1.20 --output dist --no-build --no-restore
+      run:  dotnet pack Protocols/Protocols.csproj --configuration Release /p:PackageVersion=0.1.20 --output dist --no-build --no-restore
 
     - name: Show Dir
       run: tree
