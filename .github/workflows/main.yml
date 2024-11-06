@@ -13,22 +13,25 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: showDir
+    - name: CD_Dir
       run: cd Protocols
  
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.x
+        dotnet-version: 8.x.x
  
     - name: Restore dependencies
       run: dotnet restore
  
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release /p:EnableWindowsTargeting=true  --no-restore 
  
     - name: Test
       run: dotnet test --no-restore --verbosity normal
  
     - name: Pack
       run: dotnet pack --configuration Release --output dist --no-build --no-restore
+
+    - name: Show Dir
+      run: tree
