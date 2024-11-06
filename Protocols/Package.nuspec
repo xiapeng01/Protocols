@@ -6,6 +6,7 @@
 		<title>Protocols.Net</title>
 		<authors>xiapeng01@live.cn</authors>
 		<owners>xiapeng01</owners>
+		<iconUrl>https://xiapeng01.github.io/icons/Mica.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<license type="expression">MIT</license>
 		<projectUrl>https://github.com/xiapeng01/Protocols</projectUrl>
