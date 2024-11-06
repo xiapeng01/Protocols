@@ -38,12 +38,14 @@
 		<file src="bin\Release\net462\Protocols.dll" target="lib\net462\Protocols.dll"/>
 		<file src="bin\Release\net462\Protocols.dll.config" target="lib\net462\Protocols.dll.config"/>
 		<file src="bin\Release\net462\Protocols.pdb" target="lib\net462\Protocols.pdb"/>
+		<file src="bin\Release\net462\System.IO.Ports.dll" target="lib\net462\System.IO.Ports.dll"/>
 
 		<file src="..\LICENSE.txt" target="lib\net480\LICENSE.txt"/>
 		<file src="..\README.md" target="lib\net480\README.md" />
 		<file src="bin\Release\net480\Protocols.dll" target="lib\net480\Protocols.dll"/>
 		<file src="bin\Release\net480\Protocols.dll.config" target="lib\net480\Protocols.dll.config"/>
 		<file src="bin\Release\net480\Protocols.pdb" target="lib\net480\Protocols.pdb"/>
+		<file src="bin\Release\net480\System.IO.Ports.dll" target="lib\net480\System.IO.Ports.dll"/>
 
 		<file src="..\LICENSE.txt" target="lib\net6.0\LICENSE.txt"/>
 		<file src="..\README.md" target="lib\net6.0\README.md" />
