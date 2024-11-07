@@ -13,7 +13,7 @@
 		<readme>README.md</readme>
 		<description>一个开源的工业设备通讯协议库，正在逐步完善中。</description>
 		<copyright>Copyright (c) 2024 XiaPeng</copyright>
-		<tags>Protocols;MC_3E;Fins;Mewtocol</tags>
+		<tags>Protocols;MC_3E;Fins;HostLink;Mewtocol,Modbus</tags>
 		<dependencies>
 			<group targetFramework=".NETFramework4.6.2" >
 				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
