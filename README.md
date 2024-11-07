@@ -1,25 +1,46 @@
-# Protocols-工业设备通信协议库<br>
-一个为爱发电项目，正在逐步完善中   
-在VS2022+.Net Framework4.8 + HslCommunication 本地测试通过（只测试了M,D寄存器）<br> 
-目前基本功能能用但并没有达到理想的程度，且性能并没有优化到最佳的状态，修复了部分已知bug，欢迎反馈bug（QQ:706806660）<br>
-感谢以下好友提供的帮助：<br>
-拓拓(https://github.com/kongdetuo)<br>
-where(https://github.com/wherewhere)<br>
-雾雨氏Bot<br>
-仙女之萌(https://github.com/ilyfairy)<br>
-SlimeNull(https://github.com/SlimeNull)<br>
-子禾(https://github.com/zihesenior)<br>
-Steve(https://github.com/steveworkshop)<br>
-林德熙(https://github.com/lindexi)<br>
-Shompinice(https://github.com/MicaApps)<br>
-Wang(https://github.com/2236721325)<br>
-<br>
-20240819：增加ModbusRTU。<br>
-20240820：增加ModbusASCII，ModbusTCP，增加松下Mewtocol（写多个位时还有bug未修复）！<br>
-20240828：调整了结构，并增加欧姆龙HostLink_Serial方式（使用头编码FA），其余头编码和Fins方式待后续添加<br> 
-20240901：增加了欧姆龙FinsTCP方式<br>
-20240916：增加了UDP方式<br>
-20241008：增加了帧头校验，解决沾包的问题，性能会有一定程度下降<br>
+# Protocols-工业设备通信协议库
+
+一个为爱发电项目，正在逐步完善中
+
+在VS2022+.Net Framework4.8 + HslCommunication 本地测试通过（只测试了M,D寄存器）
+
+目前基本功能能用但并没有达到理想的程度，且性能并没有优化到最佳的状态，修复了部分已知bug，欢迎反馈bug（QQ:706806660）
+
+感谢以下好友提供的帮助：
+
+拓拓(https://github.com/kongdetuo)
+
+where(https://github.com/wherewhere)
+
+雾雨氏Bot
+
+仙女之萌(https://github.com/ilyfairy)
+
+SlimeNull(https://github.com/SlimeNull)
+
+子禾(https://github.com/zihesenior)
+
+Steve(https://github.com/steveworkshop)
+
+林德熙(https://github.com/lindexi)
+
+Shompinice(https://github.com/MicaApps)
+
+Wang(https://github.com/2236721325)
+
+
+20240819：增加ModbusRTU。
+
+20240820：增加ModbusASCII，ModbusTCP，增加松下Mewtocol（写多个位时还有bug未修复）！
+
+20240828：调整了结构，并增加欧姆龙HostLink_Serial方式（使用头编码FA），其余头编码和Fins方式待后续添加
+
+20240901：增加了欧姆龙FinsTCP方式
+
+20240916：增加了UDP方式
+
+20241008：增加了帧头校验，解决沾包的问题，性能会有一定程度下降
+
 ```
 using System;
 using System.Collections.Generic;
