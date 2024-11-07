@@ -1,41 +1,67 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net462;net470;net480;net5.0;net6.0;net7.0;net8.0</TargetFrameworks> 
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Deterministic>false</Deterministic>
-    <Version>0.1.30</Version>
-	<GenerateNuspec>true</GenerateNuspec>
-	<NuspecFile>Package.nuspec</NuspecFile>
-    <!-- <NuspecProperties>id=$(AssemblyName);version=$(VersionPrefix);title=$(Title);authors=$(Authors);requireLicenseAcceptance=$(PackageRequireLicenseAcceptance);license=$(PackageLicenseExpression);icon=$(PackageIcon);projectUrl=$(PackageProjectUrl);iconUrl=$(PackageIconUrl);description=$(Description);releaseNotes=$(PackageReleaseNotes);copyright=$(Copyright);repositoryType=$(RepositoryType);repositoryUrl=$(PackageProjectUrl);repositoryCommit=$(RepositoryCommit);buildOutput=bin\$(Configuration)</NuspecProperties> -->
-	<NuspecProperties>Configuration=$(Configuration);version=$(Version)</NuspecProperties>
-	<Title>Protocols</Title>
-	<Description>一个开源的工业设备通讯协议库，正在逐步完善中。</Description>
-	<PackageProjectUrl>https://github.com/xiapeng01/Protocols</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/xiapeng01/Protocols</RepositoryUrl>
-	<RepositoryType>git</RepositoryType>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-	<PackageLicenseExpression>MIT License</PackageLicenseExpression>
-	<Copyright>Copyright (c) 2024 XiaPeng</Copyright>
+  <PropertyGroup>    
+	  <TargetFrameworks>net462;net470;net480;net5.0;net6.0;net7.0;net8.0</TargetFrameworks>     
+	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>    
+	  <Deterministic>false</Deterministic>
+	  
+	  <Title>Protocols</Title>
+	  <Version>0.1.31</Version>
+	  <Authors>XiaPeng</Authors>
+	  <Company>Mica Teams</Company>
+	  
+	  <Description>一个开源的工业设备通讯协议库，正在逐步完善中。</Description>	
+	  <PackageProjectUrl>https://github.com/xiapeng01/Protocols</PackageProjectUrl>	
+	  <RepositoryUrl>https://github.com/xiapeng01/Protocols</RepositoryUrl>	
+	  <RepositoryType>git</RepositoryType>    
+	  <PackageReadmeFile>README.md</PackageReadmeFile>	
+	  <PackageLicenseExpression>MIT License</PackageLicenseExpression>	
+	  <Copyright>Copyright (c) 2024 XiaPeng</Copyright>
+
+	  <GenerateNuspec>true</GenerateNuspec>
+	  <NuspecFile>Package.nuspec</NuspecFile>
+	  <!-- <NuspecProperties>id=$(AssemblyName) </NuspecProperties>
+	<NuspecProperties> version=$(VersionPrefix) </NuspecProperties>
+	<NuspecProperties> title=$(Title) </NuspecProperties>
+	<NuspecProperties> authors=$(Authors) </NuspecProperties>
+	<NuspecProperties> requireLicenseAcceptance=$(PackageRequireLicenseAcceptance) </NuspecProperties>
+	<NuspecProperties> license=$(PackageLicenseExpression) </NuspecProperties>
+	<NuspecProperties> icon=$(PackageIcon) </NuspecProperties>
+	<NuspecProperties> projectUrl=$(PackageProjectUrl) </NuspecProperties>
+	<NuspecProperties> iconUrl=$(PackageIconUrl) </NuspecProperties>
+	<NuspecProperties> description=$(Description) </NuspecProperties>
+	<NuspecProperties> releaseNotes=$(PackageReleaseNotes) </NuspecProperties>
+	<NuspecProperties> copyright=$(Copyright) </NuspecProperties>
+	<NuspecProperties> repositoryType=$(RepositoryType) </NuspecProperties>
+	<NuspecProperties> repositoryUrl=$(PackageProjectUrl) </NuspecProperties>
+	<NuspecProperties> repositoryCommit=$(RepositoryCommit) </NuspecProperties>
+	<NuspecProperties> buildOutput=bin\$(Configuration) </NuspecProperties> -->
+	  <NuspecProperties>Configuration=$(Configuration);version=$(Version)</NuspecProperties>
   </PropertyGroup>
 
   <ItemGroup>
+	  
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+	  
     <None Update="..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+	  
     <None Update="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None> 
+	  
   </ItemGroup>
+	
 	<Target Name="SetPackageVersion" BeforeTargets="Pack">
 		<PropertyGroup>
-			<PackageVersion>$(Version)</PackageVersion>
+			<version>3.3.3</version> 
 		</PropertyGroup>
-		<Message Text="NuGetPackageVersion: $(PackageVersion)" Importance="high" />
-	</Target>
+		<Message Text="NuGetPackageVersion: $(version)" Importance="high" />
+		<Message Text="NuGetPackageTags: $(tags)" Importance="high" />
+	</Target>  
 </Project>
  

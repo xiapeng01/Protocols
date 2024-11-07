@@ -48,7 +48,7 @@ Wang(https://github.com/2236721325)
 
 20240916：增加了UDP方式
 
-20241008：增加了帧头校验，解决沾包的问题，性能会有一定程度下降
+20241008：增加了帧头校验，解决粘包的问题，性能会有一定程度下降
 
 ```
 using System;
@@ -332,4 +332,4 @@ namespace TestProtocols
 ```
 
 ## CopyRight
-(C) 2024 xiapeng, All Rights Reserved
+(C) 2024 XiaPeng @Mica Teams, All Rights Reserved

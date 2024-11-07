@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>Protocols</id>
-		<version>$Version$</version>
-		<title>Protocols.Net</title>
+		<version>$version$</version>
+		<title>Protocols</title>
 		<authors>xiapeng01@live.cn</authors>
 		<owners>xiapeng01</owners>
 		<iconUrl>https://xiapeng01.github.io/icons/Mica.png</iconUrl>
@@ -12,8 +12,9 @@
 		<projectUrl>https://github.com/xiapeng01/Protocols</projectUrl>
 		<readme>README.md</readme>
 		<description>一个开源的工业设备通讯协议库，正在逐步完善中。</description>
-		<copyright>Copyright (c) 2024 XiaPeng</copyright>
+		<copyright>Copyright (c) 2024 XiaPeng</copyright>		
 		<tags>Protocols;MC_3E;Fins;HostLink;Mewtocol,Modbus</tags>
+		
 		<dependencies>
 			<group targetFramework=".NETFramework4.6.2" >
 				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
