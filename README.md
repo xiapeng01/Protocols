@@ -1,4 +1,15 @@
 # Protocols-工业设备通信协议库
+![Build status](https://img.shields.io/badge/Build-Success-green.svg) 
+[![NuGet Status](https://img.shields.io/nuget/v/Protocols.svg)](https://www.nuget.org/packages/Protocols/) 
+![NuGet Download](https://img.shields.io/nuget/dt/Protocols.svg) 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Protocolsnet/community) 
+[![NetFramework](https://img.shields.io/badge/Language-C%23%207.0-orange.svg)](https://blogs.msdn.microsoft.com/dotnet/2016/08/24/whats-new-in-csharp-7-0/) 
+[![Visual Studio](https://img.shields.io/badge/Visual%20Studio-2022-red.svg)](https://www.visualstudio.com/zh-hans/) 
+![copyright status](https://img.shields.io/badge/CopyRight-XiaPeng-brightgreen.svg) 
+
+
+## CopyRight
+(C) 2024 xiapeng, All Rights Reserved
 
 一个为爱发电项目，正在逐步完善中
 
