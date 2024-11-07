@@ -5,8 +5,7 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Protocolsnet/community) 
 [![NetFramework](https://img.shields.io/badge/Language-C%23%207.0-orange.svg)](https://blogs.msdn.microsoft.com/dotnet/2016/08/24/whats-new-in-csharp-7-0/) 
 [![Visual Studio](https://img.shields.io/badge/Visual%20Studio-2022-red.svg)](https://www.visualstudio.com/zh-hans/) 
-[![License](https://img.shields.io/github/license/xiapeng01/Protocols.svg)](https://github.com/xiapeng01/Protocols/blob/master/LICENSE.txt)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fxiapeng01%2FProtocols.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fxiapeng01%2FProtocols?ref=badge_shield)
+[![License](https://img.shields.io/github/license/xiapeng01/Protocols.svg)](https://github.com/xiapeng01/Protocols/blob/master/LICENSE.txt) 
 ![copyright status](https://img.shields.io/badge/CopyRight-XiaPeng-brightgreen.svg) 
 
 
