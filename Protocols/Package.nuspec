@@ -18,10 +18,15 @@
 			<group targetFramework=".NETFramework4.6.2" >
 				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
 			</group>
+			<group targetFramework=".NETFramework4.7.0" >
+				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
+			</group>
 			<group targetFramework=".NETFramework4.8.0">
 				<dependency id="System.IO.Ports" version="8.0.0" exclude="Build,Analyzers" />
 			</group>
+			<group targetFramework=".NET5.0"/>
 			<group targetFramework=".NET6.0"/>
+			<group targetFramework=".NET7.0"/>
 			<group targetFramework=".NET8.0"/>
 		</dependencies>
 	</metadata>
@@ -35,17 +40,35 @@
 		<file src="bin\Release\net462\Protocols.dll.config" target="lib\net462\Protocols.dll.config"/>
 		<file src="bin\Release\net462\Protocols.pdb" target="lib\net462\Protocols.pdb"/>
 
+		<file src="..\LICENSE.txt" target="lib\net470\LICENSE.txt"/>
+		<file src="..\README.md" target="lib\net470\README.md" />
+		<file src="bin\Release\net470\Protocols.dll" target="lib\net470\Protocols.dll"/>
+		<file src="bin\Release\net470\Protocols.dll.config" target="lib\net470\Protocols.dll.config"/>
+		<file src="bin\Release\net470\Protocols.pdb" target="lib\net470\Protocols.pdb"/>
+
 		<file src="..\LICENSE.txt" target="lib\net480\LICENSE.txt"/>
 		<file src="..\README.md" target="lib\net480\README.md" />
 		<file src="bin\Release\net480\Protocols.dll" target="lib\net480\Protocols.dll"/>
 		<file src="bin\Release\net480\Protocols.dll.config" target="lib\net480\Protocols.dll.config"/>
 		<file src="bin\Release\net480\Protocols.pdb" target="lib\net480\Protocols.pdb"/>
 
+		<file src="..\LICENSE.txt" target="lib\net5.0\LICENSE.txt"/>
+		<file src="..\README.md" target="lib\net5.0\README.md" />
+		<file src="bin\Release\net5.0\Protocols.dll" target="lib\net5.0\Protocols.dll"/>
+		<file src="bin\Release\net5.0\Protocols.dll.config" target="lib\net5.0\Protocols.dll.config"/>
+		<file src="bin\Release\net5.0\Protocols.pdb" target="lib\net5.0\Protocols.pdb"/>
+
 		<file src="..\LICENSE.txt" target="lib\net6.0\LICENSE.txt"/>
 		<file src="..\README.md" target="lib\net6.0\README.md" />
 		<file src="bin\Release\net6.0\Protocols.dll" target="lib\net6.0\Protocols.dll"/>
 		<file src="bin\Release\net6.0\Protocols.dll.config" target="lib\net6.0\Protocols.dll.config"/>
 		<file src="bin\Release\net6.0\Protocols.pdb" target="lib\net6.0\Protocols.pdb"/>
+
+		<file src="..\LICENSE.txt" target="lib\net7.0\LICENSE.txt"/>
+		<file src="..\README.md" target="lib\net7.0\README.md" />
+		<file src="bin\Release\net7.0\Protocols.dll" target="lib\net7.0\Protocols.dll"/>
+		<file src="bin\Release\net7.0\Protocols.dll.config" target="lib\net7.0\Protocols.dll.config"/>
+		<file src="bin\Release\net7.0\Protocols.pdb" target="lib\net7.0\Protocols.pdb"/>
 
 		<file src="..\LICENSE.txt" target="lib\net8.0\LICENSE.txt"/>
 		<file src="..\README.md" target="lib\net8.0\README.md" />

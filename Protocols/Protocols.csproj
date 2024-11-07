@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net462;net480;net6.0;net8.0</TargetFrameworks> 
+    <TargetFrameworks>net462;net470;net480;net5.0;net6.0;net7.0;net8.0</TargetFrameworks> 
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
-    <Version>0.1.29</Version>
+    <Version>0.1.30</Version>
 	<GenerateNuspec>true</GenerateNuspec>
 	<NuspecFile>Package.nuspec</NuspecFile>
     <!-- <NuspecProperties>id=$(AssemblyName);version=$(VersionPrefix);title=$(Title);authors=$(Authors);requireLicenseAcceptance=$(PackageRequireLicenseAcceptance);license=$(PackageLicenseExpression);icon=$(PackageIcon);projectUrl=$(PackageProjectUrl);iconUrl=$(PackageIconUrl);description=$(Description);releaseNotes=$(PackageReleaseNotes);copyright=$(Copyright);repositoryType=$(RepositoryType);repositoryUrl=$(PackageProjectUrl);repositoryCommit=$(RepositoryCommit);buildOutput=bin\$(Configuration)</NuspecProperties> -->
