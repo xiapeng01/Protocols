@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly:AssemblyConfiguration("")]
 [assembly:AssemblyCompany("Mica Teams")]
 [assembly:AssemblyProduct("Protocols")]
-[assembly:AssemblyCopyright("Copyright 2024 XiaPeng All Rights Reserved")]
+[assembly:AssemblyCopyright("Copyright 2024 XiaPeng@Mica Teams All Rights Reserved")]
 [assembly:AssemblyTrademark("")]
 
 
